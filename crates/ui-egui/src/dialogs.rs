@@ -1855,52 +1855,32 @@ fn dialog_keybindings(ui: &mut egui::Ui, app: &mut PdfCraftApp) -> bool {
 }
 
 /// `Dialog::About` content. Returns `false` when it has its own buttons and no footer is wanted.
-fn dialog_about(ui: &mut egui::Ui, req: &mut Pending) -> bool {
+fn dialog_about(ui: &mut egui::Ui, _req: &mut Pending) -> bool {
     let t = Tokens::get(ui.ctx());
-    // Tabs About · Contributors · Models.
-    let tab_id = egui::Id::unique("about_tab");
-    let mut tab = ui.data_mut(|d| d.get_temp::<u8>(tab_id)).unwrap_or(0);
-    ui.horizontal_wrapped(|ui| {
-        for (i, label) in ["About", "Contributors", "Models"].into_iter().enumerate() {
-            let i = i as u8;
-            if widgets::mode_tab(ui, tl!(label), tab == i).clicked() {
-                tab = i;
-            }
-        }
+    ui.horizontal(|ui| {
+        widgets::artcraft_mark(ui, 40.0);
+        ui.vertical(|ui| {
+            ui.label(egui::RichText::new("PdfCraft").font(theme::semibold(20.0)));
+            ui.label(crate::i18n::fmt(tl!("Version {v}"), &[("v", &pdfcraft_engine::build_info::version())]));
+        });
     });
-    ui.data_mut(|d| d.insert_temp(tab_id, tab));
-    ui.separator();
-    match tab {
-        1 => crate::credits::contributors_ui(ui),
-        2 => crate::credits::models_ui(ui),
-        _ => {
-            ui.horizontal(|ui| {
-                widgets::artcraft_mark(ui, 40.0);
-                ui.vertical(|ui| {
-                    ui.label(egui::RichText::new("PdfCraft").font(theme::semibold(20.0)));
-                    ui.label(crate::i18n::fmt(tl!("Version {v}"), &[("v", &pdfcraft_engine::build_info::version())]));
-                });
-            });
-            ui.add_space(6.0);
-            ui.label(tl!("A clean-room, open-source PDF application written in Rust. MIT OR Apache-2.0."));
-            ui.label(
-                egui::RichText::new(
-                    "Rendering: hayro (bootstrap) · UI: egui · Icons: Lucide (ISC) · Fonts: Inter, JetBrains Mono, Dancing Script (OFL)",
-                )
+    ui.add_space(8.0);
+    ui.label(tl!("A clean-room, open-source PDF application written in Rust. MIT OR Apache-2.0."));
+    ui.add_space(8.0);
+    // Who built it and what it is made of: one click away, not a page of its own.
+    egui::CollapsingHeader::new(egui::RichText::new(tl!("Credits")).color(t.text_muted)).default_open(false).show(ui, |ui| {
+        ui.label(
+            egui::RichText::new("Rendering: hayro (bootstrap) · UI: egui · Icons: Lucide (ISC) · Fonts: Inter, JetBrains Mono, Dancing Script (OFL)")
                 .color(t.text_muted)
                 .small(),
-            );
-            ui.add_space(12.0);
-            ui.horizontal(|ui| {
-                ui.label(egui::RichText::new(tl!("Part of")).color(t.text_muted));
-                widgets::artcraft_logo(ui, 16.0);
-            });
-            ui.add_space(6.0);
-            if let Some(cmd) = widgets::community_links(ui) {
-                req.link_command = Some(cmd);
-            }
-        }
-    }
+        );
+        ui.add_space(6.0);
+        egui::ScrollArea::vertical().max_height(240.0).auto_shrink([false, true]).show(ui, |ui| {
+            crate::credits::contributors_ui(ui);
+            ui.add_space(8.0);
+            crate::credits::models_ui(ui);
+        });
+    });
     true
 }
 

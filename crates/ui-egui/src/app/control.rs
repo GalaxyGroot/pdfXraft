@@ -62,6 +62,9 @@ impl PdfCraftApp {
             ("pin_side_panels", _) => {
                 self.pin_side_panels = value.parse::<bool>().map_err(|_| "pin_side_panels must be true or false")?;
             }
+            ("menubar_hidden", _) => {
+                self.menubar_hidden = value.parse::<bool>().map_err(|_| "menubar_hidden must be true or false")?;
+            }
             ("extra_keys", _) => {
                 self.extra_keys = value.parse::<bool>().map_err(|_| "extra_keys must be true or false")?;
             }

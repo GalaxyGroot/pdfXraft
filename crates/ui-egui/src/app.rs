@@ -112,6 +112,7 @@ impl PdfCraftApp {
             extra_keys: false,
             key_bindings: Default::default(),
             rail_open: true,
+            menubar_hidden: false,
             key_capture: None,
             key_message: None,
             pin_side_panels: true,

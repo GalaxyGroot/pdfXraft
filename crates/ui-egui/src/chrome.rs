@@ -73,10 +73,8 @@ pub fn tab_strip(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                     app.combine_tab.focused = false;
                 }
                 // Reserve the three icon buttons, Discord and their gaps outside the scrolling tabs.
-                let controls_width = ui.fonts_mut(|f| f.layout_no_wrap("Discord".into(), theme::medium(13.0), t.text).size().x)
-                    + 3.0 * button
-                    + 54.0
-                    + window_controls::width(&controls.right);
+                // (Five now: Discord is an icon, and the menu-bar toggle sits beside it.)
+                let controls_width = 5.0 * button + 26.0 + window_controls::width(&controls.right);
                 // Open stays in sight after the tabs: its icon, text and padding, and the gaps around it.
                 let open_width = ui.fonts_mut(|f| f.layout_no_wrap(tl!("Open").into(), theme::medium(13.0), t.text).size().x) + 38.0 + 12.0;
                 let mut tabs_width = (ui.available_width() - controls_width - open_width).max(0.0);
@@ -275,9 +273,22 @@ pub fn tab_strip(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                     if icons::button(ui, "circle-help", button, false, tl!("Keyboard shortcuts")).clicked() {
                         app.dialog = Some(Dialog::Shortcuts);
                     }
-                    // One click to the community, from anywhere in the app.
-                    if widgets::ghost_button_sized(ui, "messages-square", "Discord", tab_h).on_hover_text(pdfcraft_engine::links::DISCORD).clicked() {
+                    // One click to the community, from anywhere in the app. Just the icon: its name is
+                    // still "Discord" for screen readers and tests, and the tooltip says where it goes.
+                    let discord_tip = format!("{} ({})", tl!("Join the ArtCraft Discord"), pdfcraft_engine::links::DISCORD);
+                    if icons::labeled_button(ui, "messages-square", button, false, "Discord", &discord_tip).clicked() {
                         app.execute("help.discord");
+                    }
+                    // Beside it: hide the whole second row (menus, tool tabs, search, save and print)
+                    // for more room, and show it again. Its place in the title bar stays, so there is
+                    // always a way back; the keyboard shortcuts and Ctrl+K keep working meanwhile.
+                    let (icon, tip) = if app.menubar_hidden {
+                        ("chevron-down", tl!("Show the menu bar"))
+                    } else {
+                        ("chevron-up", tl!("Hide the menu bar"))
+                    };
+                    if icons::button(ui, icon, button, false, tip).clicked() {
+                        app.menubar_hidden = !app.menubar_hidden;
                     }
                 });
             });
@@ -587,6 +598,10 @@ const MODE_BAR_RIGHT: f32 = 3.0 * 32.0 + 3.0 * 4.0 + 8.0;
 const MODE_BAR_SEARCH_MIN: f32 = 140.0;
 
 pub fn mode_bar(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
+    // The title bar's toggle hid the whole row.
+    if app.menubar_hidden {
+        return;
+    }
     let t = Tokens::get(ui.ctx());
     // The document in the active tab may hide the menu or the tools (`crate::viewer_prefs`).
     let hidden = app.hidden_interface();
