@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<title>PdfCraft</title>
+<defs>
+<clipPath id="t"><rect width="512" height="512" rx="112"/></clipPath>
+<filter id="e1" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="10" stdDeviation="9" flood-color="#000" flood-opacity=".30"/></filter>
+<filter id="e2" x="-40%" y="-40%" width="180%" height="190%"><feDropShadow dx="0" dy="9" stdDeviation="8" flood-color="#000" flood-opacity=".38"/></filter>
+</defs>
+<g clip-path="url(#t)">
+<rect width="512" height="512" fill="#b70228"/>
+<path d="M140 84H278L354 160V374A22 22 0 0 1 332 396H140A22 22 0 0 1 118 374V106A22 22 0 0 1 140 84Z" fill="#fff" filter="url(#e1)"/>
+<path d="M278.0 84.0L278.0 138.0L278.4 142.3L279.7 146.4L281.7 150.2L284.4 153.6L287.8 156.3L291.6 158.3L295.7 159.6L300.0 160.0L354.0 160.0Z" fill="#f3c6cf"/>
+<rect x="156" y="196" width="112" height="24" rx="12" fill="#b70228"/><rect x="156" y="246" width="168" height="16" rx="8" fill="#eecdd4"/><rect x="156" y="282" width="168" height="16" rx="8" fill="#eecdd4"/><rect x="156" y="318" width="116" height="16" rx="8" fill="#eecdd4"/>
+<circle cx="340" cy="372" r="70" fill="#ffc107" filter="url(#e2)"/>
+<g transform="rotate(45 340 372) translate(340 372)" fill="#b70228">
+<polygon points="-11.0,-26.0 11.0,-26.0 11.0,20.0 -11.0,20.0"/><polygon points="-11.0,-38.0 11.0,-38.0 11.0,-30.0 -11.0,-30.0" fill="#7a011a"/><polygon points="-11.0,24.0 11.0,24.0 0.0,44.0"/>
+</g>
+</g>
+</svg>
