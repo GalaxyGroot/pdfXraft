@@ -2310,6 +2310,44 @@ fn with_nothing_open_there_is_no_edge_arrow() {
     assert!(h.query_by_label("Show the Tools panel").is_none(), "the arrow belongs to a document");
 }
 
+#[test]
+fn the_title_bar_button_hides_and_shows_the_second_row() {
+    let mut h = Harness::builder().with_size(egui::vec2(1400.0, 900.0)).build_eframe(|_cc| {
+        let mut app = PdfCraftApp::new();
+        app.set_option("language", "en").unwrap();
+        app.open_bytes("a.pdf", None, fixture(2)).unwrap();
+        app
+    });
+    h.run_steps(3);
+    assert!(!h.state().menubar_hidden, "shown by default");
+    assert!(h.query_by_label("E-Sign").is_some(), "the second row's tool tabs show");
+    h.get_by_label("Hide the menu bar").click();
+    h.run_steps(3);
+    assert!(h.state().menubar_hidden);
+    assert!(h.query_by_label("E-Sign").is_none(), "the row is gone");
+    assert!(h.query_by_label("Discord").is_some(), "the title bar stays, with the way back");
+    h.get_by_label("Show the menu bar").click();
+    h.run_steps(3);
+    assert!(!h.state().menubar_hidden);
+    assert!(h.query_by_label("E-Sign").is_some(), "and it comes back");
+}
+
+#[test]
+fn the_hidden_menu_bar_is_a_checked_setting_kept_between_sessions() {
+    let mut app = PdfCraftApp::new();
+    assert!(!app.menubar_hidden);
+    app.set_option("menubar_hidden", "true").unwrap();
+    assert!(app.set_option("menubar_hidden", "maybe").unwrap_err().contains("true or false"));
+    let mut again = PdfCraftApp::new();
+    again.restore(&app.persist());
+    assert!(again.menubar_hidden, "hidden, it stays hidden after a restart");
+    again.set_option("menubar_hidden", "false").unwrap();
+    let mut shown = PdfCraftApp::new();
+    shown.menubar_hidden = true;
+    shown.restore(&again.persist());
+    assert!(!shown.menubar_hidden, "shown again is saved too");
+}
+
 /// A 40 × 30 picture (one red corner) and a harness showing a PDF of it.
 fn picture_harness() -> (image::RgbaImage, Harness<'static, PdfCraftApp>) {
     picture_harness_sized(egui::vec2(1400.0, 900.0))

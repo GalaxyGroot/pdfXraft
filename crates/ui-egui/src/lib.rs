@@ -398,6 +398,9 @@ pub struct PdfCraftApp {
     pub extra_keys: bool,
     /// The keys of those shortcuts, as Preferences ▸ Customize keys changed them.
     pub key_bindings: canvas::extra_keys::Bindings,
+    /// The title bar's toggle hid the second row (menus, tool tabs, search, save and print). Shown by
+    /// default; the choice is kept between sessions.
+    pub menubar_hidden: bool,
     /// The navigation rail at the window's edge (and the panel it opens)
     /// is shown. The tab at the edge brings it back.
     pub rail_open: bool,

@@ -118,6 +118,7 @@ impl PdfCraftApp {
             // Not `pin_side_panels`: that was saved as true before pinning was a choice.
             "side_panels_pinned": self.pin_side_panels,
             "rail_open": self.rail_open,
+            "menubar_hidden": self.menubar_hidden,
             "key_bindings": self.key_bindings.to_json(),
             "external_viewer": self.external_viewer,
             "invert_middle_drag": self.invert_middle_drag,
@@ -312,6 +313,9 @@ impl PdfCraftApp {
         // Restored settings are untrusted: a program name of sane length, no control characters.
         if let Some(program) = v["external_viewer"].as_str().filter(|p| crate::external_viewer::valid_viewer(p)) {
             self.external_viewer = program.to_owned();
+        }
+        if let Some(hidden) = v["menubar_hidden"].as_bool() {
+            self.menubar_hidden = hidden;
         }
         if let Some(open) = v["rail_open"].as_bool() {
             self.rail_open = open;
