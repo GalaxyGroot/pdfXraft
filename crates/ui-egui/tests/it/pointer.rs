@@ -2293,10 +2293,10 @@ fn escape_under_a_dialog_closes_it_over_selected_edit_text_objects() {
     assert_eq!(blocks(&h), 0, "the objects stayed selected: Delete removes them");
 }
 
-/// With a menu of the menu bar open, V and H are the menu's: the tool stays. V picked Select.
+/// With a menu of the menu bar open, V and P are the menu's: the tool stays. V picked Select.
 #[test]
 fn the_tool_letters_with_a_menu_open_leave_the_tool() {
-    for letter in [egui::Key::V, egui::Key::H] {
+    for letter in [egui::Key::V, egui::Key::P] {
         let mut h = open(link_pdf(), "150", false);
         link_tool(&mut h);
         crate::support::open_menu(&mut h, "Edit");

@@ -211,9 +211,7 @@ fn core_tool_buttons(ui: &mut egui::Ui, app: &mut PdfCraftApp, cell: f32, popup_
     if icons::button(ui, "mouse-pointer-2", cell, app.quick_tool == QuickTool::Select, tl!("Select (V)")).clicked() {
         app.quick_tool = QuickTool::Select;
     }
-    // With the extra keyboard shortcuts on, h scrolls and the Hand tool is on p.
-    let hand_tip = if app.extra_keys { tl!("Hand (P)") } else { tl!("Hand (H)") };
-    if icons::button(ui, "hand", cell, app.quick_tool == QuickTool::Hand, hand_tip).clicked() {
+    if icons::button(ui, "hand", cell, app.quick_tool == QuickTool::Hand, tl!("Hand (P)")).clicked() {
         app.quick_tool = QuickTool::Hand;
     }
     let may_crop = command("page.crop").is_some_and(|spec| app.command_enabled(spec));

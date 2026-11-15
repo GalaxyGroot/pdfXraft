@@ -1692,11 +1692,11 @@ fn dialog_shortcuts(ui: &mut egui::Ui, app: &PdfCraftApp) -> bool {
         ("Navigation", format!("← / →, {}", pair(PAGE_PREV, PAGE_NEXT)), tl!("Previous / next page").to_string()),
         ("Navigation", alt_arrows, format!("{} / {}", tl!("Previous view"), tl!("Next view"))),
         ("Selection and tools", named("V"), tl!("Select (V)").to_string()),
-        // With the extra keyboard shortcuts on, h scrolls left and Space goes forward a screen.
+        // P is the Hand tool; holding Space pans too, unless the extra shortcuts on give Space a job.
         if extra_keys {
             ("Selection and tools", named("P"), tl!("Hand (P)").to_string())
         } else {
-            ("Selection and tools", named("H / Space (hold)"), tl!("Hand (H)").to_string())
+            ("Selection and tools", named("P / Space (hold)"), tl!("Hand (P)").to_string())
         },
         ("Selection and tools", named("S / U / D"), tl!("Sticky note / Highlight / Draw").to_string()),
         ("Pages", crate::i18n::key_name("Delete").to_string(), tl!("Delete selected pages (Organize)").to_string()),

@@ -27,9 +27,9 @@
 //!
 //! A number typed first (`12g`) applies to the next key and is dropped after a few seconds idle.
 //!
-//! Where a key was already taken, the existing meaning yields while this preference is on: the
-//! Hand tool's plain `h` and its held Space give way to scrolling left and forward one screenful,
-//! and the Hand tool moves to `p` (still in the toolbar). Nothing else changes.
+//! Space was the Hand tool when held; with this preference on it goes forward one screenful instead.
+//! The Hand tool is on `p` whether or not this preference is on (and in the toolbar), so `h` is free
+//! to scroll left. Nothing else changes.
 //!
 //! The keys are typed characters, so they follow the keyboard layout. They are read through
 //! [`PageKeys`] (nothing while a dialog, the palette or a menu is over the pages) and only when no

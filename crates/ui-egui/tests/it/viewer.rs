@@ -1849,8 +1849,8 @@ fn right_scrolls_to_a_spreads_second_page_off_screen_before_turning() {
 }
 
 #[test]
-fn v_h_and_space_pick_the_quick_tools() {
-    // The toolbar's tooltips promise "Select (V)" and "Hand (H)", but the keys did nothing.
+fn v_p_and_space_pick_the_quick_tools() {
+    // The toolbar's tooltips promise "Select (V)" and "Hand (P)", but the keys did nothing.
     use egui::{Key, Modifiers};
     use pdfcraft_ui_egui::QuickTool;
     let mut h = harness();
@@ -1861,7 +1861,7 @@ fn v_h_and_space_pick_the_quick_tools() {
         h.run_steps(2);
         h.state().quick_tool
     };
-    assert_eq!(press(&mut h, Key::H), QuickTool::Hand);
+    assert_eq!(press(&mut h, Key::P), QuickTool::Hand);
     assert_eq!(press(&mut h, Key::V), QuickTool::Select);
     // V leaves any other tool too, as the toolbar button does.
     h.state_mut().quick_tool = QuickTool::Crop;
@@ -1875,14 +1875,14 @@ fn v_h_and_space_pick_the_quick_tools() {
     h.run_steps(2);
     assert_eq!(h.state().quick_tool, QuickTool::Crop, "Space released");
     // With a modifier the letters are someone else's shortcut.
-    h.key_press_modifiers(Modifiers::SHIFT, Key::H);
+    h.key_press_modifiers(Modifiers::SHIFT, Key::P);
     h.run_steps(2);
     assert_eq!(h.state().quick_tool, QuickTool::Crop);
     // They are letters to a text field: typing in the find bar keeps the tool.
     h.state_mut().quick_tool = QuickTool::Select;
     h.state_mut().views[0].open_find();
     h.run_steps(4);
-    assert_eq!(press(&mut h, Key::H), QuickTool::Select, "typing H in the find bar");
+    assert_eq!(press(&mut h, Key::P), QuickTool::Select, "typing P in the find bar");
     h.key_down(Key::Space);
     h.run_steps(2);
     h.key_up(Key::Space);
@@ -2383,6 +2383,25 @@ fn the_tool_keys_do_nothing_with_no_document_open() {
     }
     assert_eq!(format!("{:?}", h.state().quick_tool), "Select");
     assert!(h.state().toast.is_none(), "no \"open a document first\" notice for a stray key");
+}
+
+#[test]
+fn p_picks_the_hand_with_or_without_the_extra_keys_and_h_does_not() {
+    use egui::Key;
+    use pdfcraft_ui_egui::QuickTool;
+    for extra in ["false", "true"] {
+        let mut h = harness();
+        h.state_mut().active = Some(0);
+        h.state_mut().set_option("extra_keys", extra).unwrap();
+        h.run_steps(2);
+        h.key_press(Key::P);
+        h.run_steps(2);
+        assert_eq!(h.state().quick_tool, QuickTool::Hand, "P picks the Hand, extra keys {extra}");
+        h.state_mut().quick_tool = QuickTool::Select;
+        h.key_press(Key::H);
+        h.run_steps(2);
+        assert_eq!(h.state().quick_tool, QuickTool::Select, "H is not a tool key, extra keys {extra}");
+    }
 }
 
 /// A 40 × 30 picture (one red corner) and a harness showing a PDF of it.

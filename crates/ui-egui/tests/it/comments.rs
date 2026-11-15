@@ -382,8 +382,8 @@ fn clicking_the_page_gives_the_keyboard_back_from_a_highlight_note() {
     type_key(&mut h, egui::Key::V, "v");
     assert_eq!(h.state().quick_tool, QuickTool::Select, "V picks the Select tool");
     assert_eq!(note(&h).as_deref(), Some("Note"), "V is not typed into the note");
-    type_key(&mut h, egui::Key::H, "h");
-    assert_eq!(h.state().quick_tool, QuickTool::Hand, "H picks the Hand tool");
+    type_key(&mut h, egui::Key::P, "p");
+    assert_eq!(h.state().quick_tool, QuickTool::Hand, "P picks the Hand tool");
     assert_eq!(note(&h).as_deref(), Some("Note"), "nor is H");
     // Clicking back into the note types into it again, and the letters are text there.
     note_editor(&h).click();
@@ -410,8 +410,8 @@ fn drawing_another_comment_takes_the_keyboard_from_a_highlight_note() {
     drag_pt(&mut h, (40.0, 100.0), (140.0, 40.0));
     assert_eq!(comments(&h).len(), 2);
     assert_eq!(h.state().views[0].comments.editing, None, "the empty note closed");
-    type_key(&mut h, egui::Key::H, "h");
-    assert_eq!(h.state().quick_tool, QuickTool::Hand, "H picks the Hand tool");
+    type_key(&mut h, egui::Key::P, "p");
+    assert_eq!(h.state().quick_tool, QuickTool::Hand, "P picks the Hand tool");
     // A note with text in it stays open with its text, but lets the keyboard go.
     h.state_mut().quick_tool = QuickTool::Comment(CommentTool::Highlight);
     drag_pt(&mut h, (160.0, 100.0), (260.0, 40.0));
@@ -424,8 +424,8 @@ fn drawing_another_comment_takes_the_keyboard_from_a_highlight_note() {
     drag_pt(&mut h, (40.0, 30.0), (260.0, 8.0));
     assert_eq!(comments(&h).len(), 4);
     assert_eq!(h.state().views[0].comments.editing, Some((0, 2, "Note".into())), "a note with text stays open");
-    type_key(&mut h, egui::Key::H, "h");
-    assert_eq!(h.state().quick_tool, QuickTool::Hand, "H picks the Hand tool");
+    type_key(&mut h, egui::Key::P, "p");
+    assert_eq!(h.state().quick_tool, QuickTool::Hand, "P picks the Hand tool");
     assert_eq!(note(&h).as_deref(), Some("Note"), "H is not typed into the note");
 }
 
@@ -4777,7 +4777,7 @@ fn hotbar_docked_left_does_not_override_quick_tools() {
     });
     h.run_steps(5);
     // Controls in the docked bar share one layout, so none may overlap (#5890).
-    let labels = ["Drag hotbar", "Select (V)", "Hand (H)", "Add a sticky note", "Highlight", "Draw", "Fill & Sign: Add signature", "Hotbar settings"];
+    let labels = ["Drag hotbar", "Select (V)", "Hand (P)", "Add a sticky note", "Highlight", "Draw", "Fill & Sign: Add signature", "Hotbar settings"];
     let rects: Vec<_> = labels.iter().map(|&label| h.get_by_label(label).rect()).collect();
     for (i, a) in rects.iter().enumerate() {
         for (j, b) in rects.iter().enumerate().skip(i + 1) {
@@ -4834,7 +4834,7 @@ fn hotbar_settings_menu_closes_on_click_outside() {
     h.get_by_label("Hotbar settings").click();
     h.run_steps(3);
     assert!(h.query_by_label("Close menu").is_some());
-    h.get_by_label("Hand (H)").click();
+    h.get_by_label("Hand (P)").click();
     h.run_steps(3);
     assert!(h.query_by_label("Close menu").is_none());
     assert_eq!(h.state().quick_tool, QuickTool::Hand);
@@ -5756,9 +5756,9 @@ fn undo_with_a_card_menu_open_leaves_the_page_keys() {
     assert_eq!(comments(&h).len(), 1, "Undo took the second square back");
     assert_eq!(h.state().views[0].comments.selected, None, "and deselected the first");
     assert!(!egui::Popup::is_any_open(&h.ctx), "the menu closed with its card's button");
-    h.key_press(egui::Key::H);
+    h.key_press(egui::Key::P);
     h.run_steps(2);
-    assert_eq!(h.state().quick_tool, QuickTool::Hand, "H picks the Hand tool");
+    assert_eq!(h.state().quick_tool, QuickTool::Hand, "P picks the Hand tool");
 }
 
 /// ⌘C with a menu of the menu bar open is the menu's: the selected comment isn't copied.

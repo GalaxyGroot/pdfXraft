@@ -891,7 +891,7 @@ fn scrolling(ui: &mut egui::Ui, app: &mut PdfCraftApp, t: &Tokens, ctx: &mut Pre
     });
     ctx.label_secondary(
         ui,
-        tl!("Single keys beside the usual ones: h j k l scroll, Space and b a screen forward and back, g and G go to a page (12g), comma and period turn pages, / and ? search forward and backward in a bar at the bottom, n and N go on, m t T keep places, W H F fit, z zoom (150z), [ ] rotate, I invert colours. The Hand tool then moves from H and Space to P."),
+        tl!("Single keys beside the usual ones: h j k l scroll, Space and b a screen forward and back, g and G go to a page (12g), comma and period turn pages, / and ? search forward and backward in a bar at the bottom, n and N go on, m t T keep places, W H F fit, z zoom (150z), [ ] rotate, I invert colours. Space then goes forward a screen instead of holding the Hand tool, which is on P."),
         t,
     );
 }

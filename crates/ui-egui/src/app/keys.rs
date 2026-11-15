@@ -136,8 +136,6 @@ impl PdfCraftApp {
             self.quick_tool = QuickTool::Select;
             self.space_hand = None;
         }
-        // With the extra keyboard shortcuts on (Preferences), h scrolls left and Space goes forward
-        // a screen, so the Hand tool is on p instead (and its toolbar button).
         // The comment tools: S is the sticky note, U highlights and D draws. Each runs what its toolbar
         // button runs: the tool last used in its group (the sticky note, the highlighter and the
         // pencil to begin with). Only with a document open, and only a tool that may run.
@@ -151,8 +149,10 @@ impl PdfCraftApp {
                 }
             }
         }
-        let hand_key = if self.extra_keys { Key::P } else { Key::H };
-        if keys.pressed(ctx, hand_key) {
+        // P is the Hand tool, with or without the extra keyboard shortcuts. H is not a tool key: with
+        // the extra shortcuts on it scrolls left. (Holding Space still pans with the Hand, except
+        // with the extra shortcuts on, where Space goes forward a screen.)
+        if keys.pressed(ctx, Key::P) {
             self.quick_tool = QuickTool::Hand;
             self.space_hand = None;
         }

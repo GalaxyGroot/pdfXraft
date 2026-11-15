@@ -83,6 +83,8 @@ fn help_commands_open_each_link() {
         let mut h = harness(|_| {});
         assert!(h.state_mut().execute(l.command), "{}", l.command);
         assert_eq!(h.state().last_opened_url.as_deref(), Some(l.url));
-        assert_eq!(pdfcraft_engine::commands::command(l.command).unwrap().menu, Some("Help"));
+        // Only the source link is still in the Help menu; the rest are palette-only commands.
+        let menu = if l.command == "help.github" { Some("Help") } else { None };
+        assert_eq!(pdfcraft_engine::commands::command(l.command).unwrap().menu, menu, "{}", l.command);
     }
 }
