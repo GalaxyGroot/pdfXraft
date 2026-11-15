@@ -1,9 +1,12 @@
 name: Build and release (Windows portable + macOS dmg)
 
 # Builds PdfCraft and publishes a GitHub Release with:
-#   pdfcraft-<version>-windows-x64-portable.zip   pdfcraft.exe + LICENSE (no installer; just unzip and run)
-#   pdfcraft-<version>-macos-aarch64.dmg          Apple Silicon, UNSIGNED (right-click > Open the first time)
-#   SHA256SUMS.txt                                checksums of the two files above
+#   pdfcraft-<version>-windows-x64-portable.zip   pdfcraft.exe, pdfcraft-cli.exe, the OCR models/ folder and
+#                                                 LICENSE (no installer; just unzip and run)
+#   pdfcraft-<version>-macos-aarch64.dmg          Apple Silicon app with the OCR models inside, UNSIGNED
+#                                                 (right-click > Open the first time)
+#   pdfcraft-cli-<version>-macos-aarch64.zip      the command-line tool for macOS
+#   SHA256SUMS.txt                                checksums of the files above
 # Nothing here needs an Apple account or any secret beyond the automatic GITHUB_TOKEN.
 #
 # How to run it (it never starts by itself on a plain push):
@@ -77,9 +80,9 @@ jobs:
           key: windows-x64-${{ hashFiles('Cargo.lock') }}
           restore-keys: windows-x64-
 
-      - name: Build
+      - name: Build (the app and the command-line tool)
         shell: pwsh
-        run: cargo build --release --locked -p pdfcraft
+        run: cargo build --release --locked -p pdfcraft -p pdfcraft-cli
 
       - name: Portable zip
         shell: pwsh
@@ -87,7 +90,16 @@ jobs:
           $name = "pdfcraft-${{ needs.meta.outputs.version }}-windows-x64-portable"
           New-Item -ItemType Directory -Force -Path "dist/$name" | Out-Null
           Copy-Item target/release/pdfcraft.exe "dist/$name/"
+          Copy-Item target/release/pdfcraft-cli.exe "dist/$name/"
           Copy-Item LICENSE "dist/$name/"
+          # The OCR models Scan & OCR needs (CC-BY-SA-4.0; each comes with its licence file and an
+          # ATTRIBUTION.txt). The app and the CLI both look in a models/ folder beside the exe.
+          cargo run -p xtask -- models "dist/$name/models"
+          if ($LASTEXITCODE -ne 0) { throw "fetching the OCR models failed" }
+          Get-ChildItem "dist/$name/models" -Filter *.part | Remove-Item -Force
+          $found = @(Get-ChildItem "dist/$name/models" -File | Where-Object { $_.Name -notmatch 'LICENCE|ATTRIBUTION' })
+          if ($found.Count -lt 2) { throw "expected the OCR model files in models/, found $($found.Count)" }
+          Get-ChildItem "dist/$name" -Recurse -File | Select-Object FullName, Length | Format-Table -AutoSize
           Compress-Archive -Path "dist/$name" -DestinationPath "dist/$name.zip" -Force
           Get-Item "dist/$name.zip" | Format-List Name, Length
 
@@ -139,7 +151,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: pdfcraft-macos-arm64-unsigned
-          path: dist/release/*.dmg
+          path: |
+            dist/release/*.dmg
+            dist/release/pdfcraft-cli-*.zip
           if-no-files-found: error
           retention-days: 14
 
@@ -178,6 +192,6 @@ jobs:
               --repo "$GITHUB_REPOSITORY" \
               --target "$GITHUB_SHA" \
               --title "PdfCraft $VERSION" \
-              --notes "Portable Windows 64-bit build (unzip and run pdfcraft.exe) and an unsigned macOS Apple Silicon disk image (right-click > Open the first time). Checksums are in SHA256SUMS.txt." \
+              --notes "Windows 64-bit portable zip (unzip and run pdfcraft.exe; it holds the command-line tool pdfcraft-cli.exe and the OCR models too), an unsigned macOS Apple Silicon disk image (right-click > Open the first time; the OCR models are inside), and the macOS command-line tool. Checksums are in SHA256SUMS.txt." \
               $flags
           fi
