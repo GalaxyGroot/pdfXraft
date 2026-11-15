@@ -52,8 +52,9 @@ const COUNT_SECONDS: f64 = 3.0;
 const MAX_MARKS: usize = 64;
 /// How long the view history grows (as in `DocView::go_to_page`).
 const MAX_HISTORY: usize = 200;
-/// Keys the tools already use (Select and Hand): not for these actions.
-const RESERVED: [char; 2] = ['p', 'v'];
+/// Keys the tools already use (V Select, P Hand, S sticky note, U highlight, D draw): not for these
+/// actions.
+const RESERVED: [char; 5] = ['p', 'v', 's', 'u', 'd'];
 
 /// What a key does.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -244,7 +245,7 @@ impl Kind {
 pub enum BindError {
     /// A digit (they type a number before a key), a space-like or control character.
     Unusable,
-    /// A key the Select and Hand tools use.
+    /// A key a tool uses (Select, Hand, sticky note, highlight, draw).
     Reserved,
     /// Another action has it.
     Taken(Kind),
@@ -639,6 +640,9 @@ mod tests {
         assert_eq!(b.set(Kind::ScrollDown, '\t'), Err(BindError::Unusable));
         assert_eq!(b.set(Kind::ScrollDown, 'p'), Err(BindError::Reserved), "the Hand tool's");
         assert_eq!(b.set(Kind::ScrollDown, 'V'), Err(BindError::Reserved), "and the Select tool's, shifted or not");
+        for tool_key in ['s', 'S', 'u', 'U', 'd', 'D'] {
+            assert_eq!(b.set(Kind::ScrollDown, tool_key), Err(BindError::Reserved), "{tool_key}: the comment tools'");
+        }
         assert!(b.is_default(), "a refusal changes nothing");
         // Space is allowed once it is free.
         assert_eq!(b.set(Kind::ScrollDown, ' '), Err(BindError::Taken(Kind::ScreenForward)));

@@ -1698,6 +1698,7 @@ fn dialog_shortcuts(ui: &mut egui::Ui, app: &PdfCraftApp) -> bool {
         } else {
             ("Selection and tools", named("H / Space (hold)"), tl!("Hand (H)").to_string())
         },
+        ("Selection and tools", named("S / U / D"), tl!("Sticky note / Highlight / Draw").to_string()),
         ("Pages", crate::i18n::key_name("Delete").to_string(), tl!("Delete selected pages (Organize)").to_string()),
         ("Pages", key(SELECT_ALL), tl!("Select all pages (Organize)").to_string()),
     ];
@@ -1804,7 +1805,7 @@ fn dialog_keybindings(ui: &mut egui::Ui, app: &mut PdfCraftApp) -> bool {
                 Err(BindError::Unusable) => {
                     app.key_message = Some(tl!("That key can't be used: digits type a number, and spaces and control keys aren't keys.").to_string());
                 }
-                Err(BindError::Reserved) => app.key_message = Some(tl!("P and V select the Hand and Select tools.").to_string()),
+                Err(BindError::Reserved) => app.key_message = Some(tl!("V, P, S, U and D select tools, so they can't be used here.").to_string()),
                 Err(BindError::Taken(other)) => {
                     app.key_message = Some(format!("{} {}", tl!("Already used by:"), tl!(other.label())));
                 }

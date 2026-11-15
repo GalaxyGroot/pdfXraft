@@ -138,6 +138,19 @@ impl PdfCraftApp {
         }
         // With the extra keyboard shortcuts on (Preferences), h scrolls left and Space goes forward
         // a screen, so the Hand tool is on p instead (and its toolbar button).
+        // The comment tools: S is the sticky note, U highlights and D draws. Each runs what its toolbar
+        // button runs: the tool last used in its group (the sticky note, the highlighter and the
+        // pencil to begin with). Only with a document open, and only a tool that may run.
+        if self.active.is_some() {
+            for (group, key) in [(0, Key::S), (1, Key::U), (2, Key::D)] {
+                if keys.pressed(ctx, key) {
+                    let command = self.comment_prefs.group_tool[group].command();
+                    if pdfcraft_engine::commands::command(command).is_some_and(|spec| self.command_enabled(spec)) {
+                        self.execute(command);
+                    }
+                }
+            }
+        }
         let hand_key = if self.extra_keys { Key::P } else { Key::H };
         if keys.pressed(ctx, hand_key) {
             self.quick_tool = QuickTool::Hand;

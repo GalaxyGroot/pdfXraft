@@ -2348,6 +2348,43 @@ fn the_hidden_menu_bar_is_a_checked_setting_kept_between_sessions() {
     assert!(!shown.menubar_hidden, "shown again is saved too");
 }
 
+#[test]
+fn s_u_and_d_pick_the_sticky_note_the_highlighter_and_the_pencil() {
+    let mut h = Harness::builder().with_size(egui::vec2(1400.0, 900.0)).build_eframe(|_cc| {
+        let mut app = PdfCraftApp::new();
+        app.set_option("language", "en").unwrap();
+        app.open_bytes("a.pdf", None, fixture(2)).unwrap();
+        app
+    });
+    h.run_steps(3);
+    let tool = |h: &Harness<'static, PdfCraftApp>| format!("{:?}", h.state().quick_tool);
+    assert_eq!(tool(&h), "Select");
+    for (key, expect) in [(egui::Key::S, "Note"), (egui::Key::U, "Highlight"), (egui::Key::D, "Ink")] {
+        h.key_press(key);
+        h.run_steps(3);
+        assert!(tool(&h).contains(expect), "{key:?}: {}", tool(&h));
+        h.key_press(egui::Key::V);
+        h.run_steps(2);
+        assert_eq!(tool(&h), "Select", "V puts the tool down again");
+    }
+}
+
+#[test]
+fn the_tool_keys_do_nothing_with_no_document_open() {
+    let mut h = Harness::builder().with_size(egui::vec2(1400.0, 900.0)).build_eframe(|_cc| {
+        let mut app = PdfCraftApp::new();
+        app.set_option("language", "en").unwrap();
+        app
+    });
+    h.run_steps(3);
+    for key in [egui::Key::S, egui::Key::U, egui::Key::D] {
+        h.key_press(key);
+        h.run_steps(2);
+    }
+    assert_eq!(format!("{:?}", h.state().quick_tool), "Select");
+    assert!(h.state().toast.is_none(), "no \"open a document first\" notice for a stray key");
+}
+
 /// A 40 × 30 picture (one red corner) and a harness showing a PDF of it.
 fn picture_harness() -> (image::RgbaImage, Harness<'static, PdfCraftApp>) {
     picture_harness_sized(egui::vec2(1400.0, 900.0))

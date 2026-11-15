@@ -211,7 +211,9 @@ fn core_tool_buttons(ui: &mut egui::Ui, app: &mut PdfCraftApp, cell: f32, popup_
     if icons::button(ui, "mouse-pointer-2", cell, app.quick_tool == QuickTool::Select, tl!("Select (V)")).clicked() {
         app.quick_tool = QuickTool::Select;
     }
-    if icons::button(ui, "hand", cell, app.quick_tool == QuickTool::Hand, tl!("Hand (H)")).clicked() {
+    // With the extra keyboard shortcuts on, h scrolls and the Hand tool is on p.
+    let hand_tip = if app.extra_keys { tl!("Hand (P)") } else { tl!("Hand (H)") };
+    if icons::button(ui, "hand", cell, app.quick_tool == QuickTool::Hand, hand_tip).clicked() {
         app.quick_tool = QuickTool::Hand;
     }
     let may_crop = command("page.crop").is_some_and(|spec| app.command_enabled(spec));
@@ -225,7 +227,10 @@ fn core_tool_buttons(ui: &mut egui::Ui, app: &mut PdfCraftApp, cell: f32, popup_
     for g in 0..comments::GROUPS.len() {
         let current = app.comment_prefs.group_tool[g];
         let active = matches!(app.quick_tool, QuickTool::Comment(t) if t.group() == g);
-        let resp = icons::button(ui, current.icon(), cell, active, tl!(current.label()));
+        // The tooltip names the key (S, U, D) that runs this button's tool; the accessible name stays the tool's.
+        let key = ["S", "U", "D"].get(g).copied().unwrap_or("");
+        let tip = if key.is_empty() { tl!(current.label()).to_string() } else { format!("{} ({key})", tl!(current.label())) };
+        let resp = icons::labeled_button(ui, current.icon(), cell, active, tl!(current.label()), &tip);
         if comments::GROUPS[g].len() == 1 {
             if resp.clicked() {
                 app.execute(current.command());
