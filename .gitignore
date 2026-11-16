@@ -13,3 +13,7 @@ plan/
 
 # Project roadmap notes: kept on disk, not published from this repository.
 /ROADMAP.md
+
+# Speed benchmark: the test PDFs it generates and its results stay local.
+/bench/corpus/
+/bench/results/
