@@ -254,6 +254,8 @@ fn whole_page_actions_still_require_copy_permission() {
 fn legacy_text_delete_survives_switching_out_of_the_image_tool() {
     let mut h = harness(fixture(0, false, false));
     h.state_mut().execute("edit.edit_text");
+    // Edit text's panel is wider than the Tools list, which moves the page: let it settle.
+    h.run_steps(6);
     right_click(&mut h, [35.0, 35.0]);
     h.get_by_label("Copy Image").click();
     h.run_steps(2);

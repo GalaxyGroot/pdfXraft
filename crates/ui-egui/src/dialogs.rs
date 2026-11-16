@@ -1652,13 +1652,20 @@ fn dialog_shortcuts(ui: &mut egui::Ui, app: &PdfCraftApp) -> bool {
         SELECT_ALL, ZOOM_IN, ZOOM_OUT,
     };
     // The headings, in the order they are shown; empty ones are dropped below.
-    let mut groups: Vec<(String, Vec<(String, String)>)> =
-        ["File", "Edit", "View", "Pages", "Navigation", "Selection and tools", "Help", "Other"].iter().map(|n| ((*n).to_owned(), Vec::new())).collect();
+    let mut groups: Vec<(String, Vec<(String, String)>)> = ["File", "Edit", "View", "Pages", "Navigation", "Selection and tools", "Help", "Other"]
+        .iter()
+        .map(|n| ((*n).to_owned(), Vec::new()))
+        .collect();
     // Registered commands first (always in sync with the real bindings), by their menu, then the
     // keys the document view handles itself.
     for c in pdfcraft_engine::commands::COMMANDS {
         if let Some(k) = c.shortcut {
-            add_shortcut(&mut groups, c.menu.unwrap_or("Other"), crate::commands::shortcut_label(ui.ctx(), k), tl!(c.label).trim_end_matches('…').to_string());
+            add_shortcut(
+                &mut groups,
+                c.menu.unwrap_or("Other"),
+                crate::commands::shortcut_label(ui.ctx(), k),
+                tl!(c.label).trim_end_matches('…').to_string(),
+            );
         }
     }
     let key = |s: pdfcraft_engine::commands::Shortcut| crate::commands::shortcut_label(ui.ctx(), s);
@@ -1725,8 +1732,10 @@ fn dialog_shortcuts(ui: &mut egui::Ui, app: &PdfCraftApp) -> bool {
     // however long a key is.
     let key_width = (column_width * 0.45).clamp(110.0, 210.0);
     let what_width = (column_width - key_width - 12.0).max(60.0);
-    let heights: Vec<f32> =
-        groups.iter().map(|(_, rows)| 1.9 + rows.iter().map(|(k, w)| row_lines(k, w, key_width / 7.6, what_width / 6.8) + 0.25).sum::<f32>()).collect();
+    let heights: Vec<f32> = groups
+        .iter()
+        .map(|(_, rows)| 1.9 + rows.iter().map(|(k, w)| row_lines(k, w, key_width / 7.6, what_width / 6.8) + 0.25).sum::<f32>())
+        .collect();
     let assigned = assign_columns(&heights, columns);
     // The tallest column, in points (a line of a row takes about 22): when it fits the window the
     // columns are laid out as they are and the window grows to hold them, with no scroll area to
@@ -1747,7 +1756,9 @@ fn dialog_shortcuts(ui: &mut egui::Ui, app: &PdfCraftApp) -> bool {
                             ui.spacing_mut().item_spacing.x = 12.0;
                             ui.allocate_ui(egui::vec2(key_width, 0.0), |ui| {
                                 ui.set_width(key_width);
-                                ui.add(egui::Label::new(egui::RichText::new(k).font(egui::FontId::monospace(12.5))).wrap_mode(egui::TextWrapMode::Wrap));
+                                ui.add(
+                                    egui::Label::new(egui::RichText::new(k).font(egui::FontId::monospace(12.5))).wrap_mode(egui::TextWrapMode::Wrap),
+                                );
                             });
                             ui.allocate_ui(egui::vec2(what_width, 0.0), |ui| {
                                 ui.set_width(what_width);

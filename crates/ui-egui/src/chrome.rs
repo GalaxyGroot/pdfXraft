@@ -21,9 +21,12 @@ pub const MAC_TITLE_BAR: f32 = 28.0;
 const MAC_LIGHT: f32 = 12.0;
 const MAC_LIGHT_PITCH: f32 = 20.0;
 const MAC_LIGHTS_LEFT: f32 = 10.0;
+/// The gap between the last traffic light and the first control. The Home button's icon sits about
+/// 6 pt inside its box, so 2 pt keeps the boxes apart and Home close to the lights.
+const MAC_LIGHTS_GAP: f32 = 2.0;
 /// Where the strip's content starts to the right of the traffic lights: the end of the three
-/// lights plus the same gap the lights keep from the top of the window.
-pub const MAC_CONTENT_LEFT: f32 = MAC_LIGHTS_LEFT + 2.0 * MAC_LIGHT_PITCH + MAC_LIGHT + (MAC_TITLE_BAR - MAC_LIGHT) / 2.0;
+/// lights plus `MAC_LIGHTS_GAP`.
+pub const MAC_CONTENT_LEFT: f32 = MAC_LIGHTS_LEFT + 2.0 * MAC_LIGHT_PITCH + MAC_LIGHT + MAC_LIGHTS_GAP;
 /// The strip and its controls everywhere else.
 const TAB_STRIP: f32 = 38.0;
 const TAB_HEIGHT: f32 = 30.0;
@@ -75,8 +78,8 @@ pub fn tab_strip(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                 // Reserve the three icon buttons, Discord and their gaps outside the scrolling tabs.
                 // (Five now: Discord is an icon, and the menu-bar toggle sits beside it.)
                 let controls_width = 5.0 * button + 26.0 + window_controls::width(&controls.right);
-                // Open stays in sight after the tabs: its icon, text and padding, and the gaps around it.
-                let open_width = ui.fonts_mut(|f| f.layout_no_wrap(tl!("Open").into(), theme::medium(13.0), t.text).size().x) + 38.0 + 12.0;
+                // Open (just its plus) stays in sight after the tabs, with the gaps around it.
+                let open_width = tab_h + 12.0;
                 let mut tabs_width = (ui.available_width() - controls_width - open_width).max(0.0);
                 // Tabs shrink to share the strip (names end in "…") and scroll only once they reach
                 // their narrowest; then arrows either side say so and step through them.
@@ -237,7 +240,8 @@ pub fn tab_strip(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                 }
                 ui.add_space(4.0);
                 let tip = crate::commands::command_tip(ui.ctx(), tl!("Open a PDF ({key})"), "file.open");
-                if widgets::ghost_button_sized(ui, "plus", tl!("Open"), tab_h).on_hover_text(tip).clicked() {
+                // Just the plus: its tooltip and accessible name say Open.
+                if icons::labeled_button(ui, "plus", tab_h, false, tl!("Open"), &tip).clicked() {
                     app.open_dialog();
                 }
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
@@ -282,11 +286,8 @@ pub fn tab_strip(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                     // Beside it: hide the whole second row (menus, tool tabs, search, save and print)
                     // for more room, and show it again. Its place in the title bar stays, so there is
                     // always a way back; the keyboard shortcuts and Ctrl+K keep working meanwhile.
-                    let (icon, tip) = if app.menubar_hidden {
-                        ("chevron-down", tl!("Show the menu bar"))
-                    } else {
-                        ("chevron-up", tl!("Hide the menu bar"))
-                    };
+                    let (icon, tip) =
+                        if app.menubar_hidden { ("chevron-down", tl!("Show the menu bar")) } else { ("chevron-up", tl!("Hide the menu bar")) };
                     if icons::button(ui, icon, button, false, tip).clicked() {
                         app.menubar_hidden = !app.menubar_hidden;
                     }
@@ -986,7 +987,7 @@ mod page_position_tests {
 
 #[cfg(test)]
 mod tab_widths {
-    use super::{MAC_CONTENT_LEFT, MAC_LIGHT, MAC_LIGHT_PITCH, MAC_LIGHTS_LEFT, MAC_TITLE_BAR, tab_cap};
+    use super::{MAC_CONTENT_LEFT, MAC_LIGHT, MAC_LIGHT_PITCH, MAC_LIGHTS_GAP, MAC_LIGHTS_LEFT, tab_cap};
 
     /// Tabs that fit keep their own widths.
     #[test]
@@ -1060,10 +1061,11 @@ mod tab_widths {
 
     #[test]
     fn the_mac_title_bar_centres_and_clears_the_traffic_lights() {
-        // The lights are centred in the bar, and content keeps the same gap after them (#789).
-        let margin = (MAC_TITLE_BAR - MAC_LIGHT) / 2.0;
+        // Content starts just after the lights, never under them (#789).
         let lights_end = MAC_LIGHTS_LEFT + 2.0 * MAC_LIGHT_PITCH + MAC_LIGHT;
-        assert_eq!(MAC_CONTENT_LEFT - lights_end, margin);
+        assert_eq!(MAC_CONTENT_LEFT - lights_end, MAC_LIGHTS_GAP);
+        // The first control must not touch the green light.
+        const { assert!(MAC_LIGHTS_GAP > 0.0) };
         // `egui::Margin` is in `i8`.
         assert!(MAC_CONTENT_LEFT <= f32::from(i8::MAX));
     }

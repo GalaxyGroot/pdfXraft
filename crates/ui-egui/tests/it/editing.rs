@@ -4878,7 +4878,8 @@ fn page_context_menu_items_disabled_on_protected_pdf() {
     assert!(!doc.allows_assembly());
     assert!(!doc.allows_annotation());
 
-    let r = h.state().views[0].page_screen_rect(0).expect("on screen");
+    // The page is fit to the width, so it can be taller than the window: click its visible part.
+    let r = h.state().views[0].page_screen_rect(0).expect("on screen").intersect(h.state().views[0].viewport_rect());
     let c = r.center();
     // Right click on page in Select mode
     h.hover_at(c);
@@ -10040,6 +10041,10 @@ fn a_paragraph_running_off_its_page_edits_without_covering_the_next_page() {
         |h: &Harness<'static, PdfCraftApp>| (h.state().views[0].page_screen_rect(0).unwrap(), h.state().views[0].page_screen_rect(1).unwrap());
     // The same pages without Edit text, so without the paragraph's outline: what the gap looks
     // like there, pixel by pixel (review on #3070: it isn't one colour on every platform).
+    // The Tools pane is as wide as the tool needs before Edit text opens, so it doesn't move the
+    // pages sideways (the All tools list is narrower than a tool's own panel).
+    h.state_mut().left = pdfcraft_ui_egui::LeftPanel::Tool("edit");
+    h.run_steps(6);
     let (first, second) = rects(&h);
     let plain = h.render().unwrap();
     assert!(h.state_mut().execute("edit.edit_text"));

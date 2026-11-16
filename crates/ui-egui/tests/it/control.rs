@@ -2098,7 +2098,7 @@ fn click_and_drag_refuse_coordinates_that_overflow_like_move() {
 }
 
 #[test]
-fn page_size_shows_while_the_pointer_is_in_the_bottom_left_quadrant() {
+fn page_size_shows_while_the_pointer_is_in_the_bottom_right_quadrant() {
     let (mut h, _c) = harness();
     let area = h.state().views[0].viewport_rect();
     let shown = |h: &Harness<'static, PdfCraftApp>| {
@@ -2109,9 +2109,9 @@ fn page_size_shows_while_the_pointer_is_in_the_bottom_left_quadrant() {
     h.event(egui::Event::PointerMoved(away));
     h.run_steps(3);
     assert!(!shown(&h), "top-right: hidden");
-    h.event(egui::Event::PointerMoved(area.left_bottom() + egui::vec2(80.0, -80.0)));
+    h.event(egui::Event::PointerMoved(area.right_bottom() + egui::vec2(-80.0, -80.0)));
     h.run_steps(3);
-    assert!(shown(&h), "bottom-left: shown");
+    assert!(shown(&h), "bottom-right: shown");
     if let Ok(dir) = std::env::var("PDFCRAFT_SHOT_DIR") {
         let _gpu = crate::gpu();
         h.render().unwrap().save(format!("{dir}/page-size-hint.png")).unwrap();

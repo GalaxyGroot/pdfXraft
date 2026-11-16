@@ -10,8 +10,10 @@ name: Build and release (Windows portable + macOS dmg)
 # Nothing here needs an Apple account or any secret beyond the automatic GITHUB_TOKEN.
 #
 # How to run it (it never starts by itself on a plain push):
-#   * Publish a release: push a tag such as v0.21.1, or Actions > Run workflow and fill in `tag`.
-#   * Build only, no release: Actions > Run workflow with `tag` empty. The files are then attached
+#   * Publish a release: push a tag such as v0.21.2, or Actions > Run workflow and fill in `tag`.
+#   * Run workflow publishes v0.21.2 by default (the `tag` box is pre-filled); change it for
+#     another version, and bump `version` in Cargo.toml to match, since the file names use it.
+#   * Build only, no release: Actions > Run workflow with `tag` emptied. The files are then attached
 #     to the run as artifacts.
 #
 # Private repository: Windows minutes count 2x and macOS minutes 10x against the free quota.
@@ -20,9 +22,9 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Release tag to publish, e.g. v0.21.1 (empty: build only, no release)"
+        description: "Release tag to publish (empty: build only, no release)"
         type: string
-        default: ""
+        default: "v0.21.2"
   push:
     tags: ["v*"]
 

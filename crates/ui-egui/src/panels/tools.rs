@@ -10,6 +10,46 @@ fn hue(g: &ToolGroup) -> Color32 {
     Color32::from_rgb(g.hue[0], g.hue[1], g.hue[2])
 }
 
+/// Room `tool_row` keeps at the left of a label (its icon), at the right (the pin button and a gap),
+/// and the Tools pane's margins and border around the list plus the scrollbar's gutter.
+const ROW_ICON_SPACE: f32 = 36.0;
+const ROW_PIN_SPACE: f32 = 26.0 + ROW_PIN_GAP;
+/// Gap kept between a label and the pin button's room.
+const ROW_PIN_GAP: f32 = 2.0;
+const PANE_FRAME: f32 = 14.0 + 14.0 + 2.0;
+/// Spare room on top of the measured names. Text is laid out on the display's pixel grid, so a name
+/// can draw a little wider than it measured, and then ends in "…" at exactly the measured width.
+const LIST_SLACK: f32 = 10.0;
+/// The header's lead and Close buttons, the title and the gaps: the list is never narrower.
+const LIST_MIN_WIDTH: f32 = 200.0;
+
+/// The width the Tools pane needs to show the All tools list without a wide empty strip beside the
+/// names: the longest name (in the language in use, with its badge) and what each row reserves.
+/// `None` when the pane shows something else (a tool's own panel, Organize, the calculation order),
+/// which keep the saved width: Format text's rows need at least `TOOLS_RANGE`'s minimum.
+///
+/// Only the rows showing count: a long name hidden under View more would otherwise set the width
+/// for the short list. View more widens the pane if its names need it.
+pub(crate) fn all_tools_list_width(app: &PdfCraftApp, ui: &mut egui::Ui) -> Option<f32> {
+    if app.left != LeftPanel::AllTools || (app.active.is_some() && crate::organize_panel::showing(app)) {
+        return None;
+    }
+    let widest = ui.fonts_mut(|f| {
+        let shown = if app.all_tools_expanded { TOOL_GROUPS.len() } else { COLLAPSED_TOOLS.min(TOOL_GROUPS.len()) };
+        TOOL_GROUPS[..shown]
+            .iter()
+            .map(|g| {
+                let name = f.layout_no_wrap(tl!(g.label).to_owned(), theme::regular(13.5), Color32::WHITE).size().x;
+                let badge = g.badge.map_or(0.0, |b| f.layout_no_wrap(tl!(b).to_owned(), theme::semibold(9.5), Color32::WHITE).size().x + 18.0);
+                name + badge
+            })
+            .fold(0.0_f32, f32::max)
+    });
+    // The scrollbar's strip is only needed once the list scrolls (known from the last frame).
+    let gutter = if ui.data(|d| d.get_temp::<bool>(list_scrolls_id())).unwrap_or(false) { SCROLLBAR_GUTTER } else { 0.0 };
+    Some((ROW_ICON_SPACE + widest + ROW_PIN_SPACE + PANE_FRAME + gutter + LIST_SLACK).ceil().max(LIST_MIN_WIDTH))
+}
+
 pub fn left_panel(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
     let t = Tokens::get(ui.ctx());
     // Organize closed another way (the grid's Close, or a page opened from it) closes the tool too,
@@ -58,6 +98,11 @@ pub(crate) fn panel_header(ui: &mut egui::Ui, t: &Tokens, title: &str, lead: Opt
     (go_back, close)
 }
 
+/// Where the All tools list remembers whether it scrolled last frame.
+fn list_scrolls_id() -> egui::Id {
+    egui::Id::unique("pdfcraft-all-tools-list-scrolls")
+}
+
 /// Width kept free at the right of a scrolling list for the floating scrollbar.
 const SCROLLBAR_GUTTER: f32 = 18.0;
 
@@ -78,8 +123,13 @@ fn all_tools(app: &mut PdfCraftApp, ui: &mut egui::Ui, t: &Tokens) {
     if close {
         app.left_open = false;
     }
-    egui::ScrollArea::vertical().auto_shrink([false, false]).show(ui, |ui| {
-        clear_of_scrollbar(ui);
+    // The scrollbar's strip is kept clear only when the list scrolls: a list that fits needs none,
+    // and the pane then fits the names (`all_tools_list_width`).
+    let scrolled = ui.data(|d| d.get_temp::<bool>(list_scrolls_id())).unwrap_or(false);
+    let out = egui::ScrollArea::vertical().auto_shrink([false, false]).show(ui, |ui| {
+        if scrolled {
+            clear_of_scrollbar(ui);
+        }
         ui.add_space(2.0);
         let shown = if app.all_tools_expanded { TOOL_GROUPS.len() } else { COLLAPSED_TOOLS.min(TOOL_GROUPS.len()) };
         for g in &TOOL_GROUPS[..shown] {
@@ -104,6 +154,8 @@ fn all_tools(app: &mut PdfCraftApp, ui: &mut egui::Ui, t: &Tokens) {
             app.all_tools_expanded = !app.all_tools_expanded;
         }
     });
+    let scrolls = out.content_size.y > out.inner_rect.height() + 0.5;
+    ui.data_mut(|d| d.insert_temp(list_scrolls_id(), scrolls));
 }
 
 /// Draw a one-line row label without painting into the status chip or beyond the sidebar.
@@ -140,7 +192,7 @@ fn tool_row(ui: &mut egui::Ui, t: &Tokens, g: &ToolGroup, is_pinned: bool) -> (e
         }
         _ => 0.0,
     };
-    let right_reserved = pin_space + badge_or_hint_reserved + 8.0;
+    let right_reserved = pin_space + badge_or_hint_reserved + ROW_PIN_GAP;
     let clipped =
         row_label(ui, tl!(g.label), theme::regular(13.5), t.text, body.left_center() + vec2(36.0, 0.0), rect.width() - 36.0 - right_reserved);
     match (g.badge, g.availability) {

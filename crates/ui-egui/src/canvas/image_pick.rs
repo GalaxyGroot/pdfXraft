@@ -230,8 +230,9 @@ mod picture_tests {
     }
 
     /// The page open with the Select tool, once it is on screen, and where a point on it is.
+    /// Tall enough for the whole page: it is fit to the width, so a wider page area makes it taller.
     fn open_page() -> (egui_kittest::Harness<'static, PdfCraftApp>, impl Fn(f32, f32) -> egui::Pos2) {
-        let mut h = egui_kittest::Harness::builder().with_size(egui::vec2(1400.0, 900.0)).build_eframe(|_cc| {
+        let mut h = egui_kittest::Harness::builder().with_size(egui::vec2(1400.0, 1900.0)).build_eframe(|_cc| {
             let mut app = PdfCraftApp::new();
             app.open_bytes("marks.pdf", None, page_with_a_comment_and_a_link()).unwrap();
             app

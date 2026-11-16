@@ -75,6 +75,9 @@ impl crate::PdfCraftApp {
 mod tests {
     use super::*;
 
+    // A failed write should fail the test; clippy's allow-unwrap-in-tests doesn't reach a helper in a
+    // `cfg(all(test, …))` module.
+    #[allow(clippy::unwrap_used)]
     fn a_file() -> std::path::PathBuf {
         let path = std::env::temp_dir().join(format!("pdfcraft-viewer-{}.pdf", std::process::id()));
         std::fs::write(&path, b"%PDF-1.4\n").unwrap();

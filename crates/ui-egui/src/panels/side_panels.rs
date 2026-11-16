@@ -71,11 +71,14 @@ pub struct SidePanels {
     pub rail_side: ToolsSide,
     pub tools_width: f32,
     pub side_width: f32,
+    /// A width dragged while the Tools pane shows the All tools list, which otherwise fits its
+    /// names. Kept for the session only: the saved `tools_width` is what the other panels use.
+    pub list_drag: Option<f32>,
 }
 
 impl Default for SidePanels {
     fn default() -> Self {
-        Self { tools_side: ToolsSide::Left, rail_side: ToolsSide::Right, tools_width: TOOLS_WIDTH, side_width: SIDE_WIDTH }
+        Self { tools_side: ToolsSide::Left, rail_side: ToolsSide::Right, tools_width: TOOLS_WIDTH, side_width: SIDE_WIDTH, list_drag: None }
     }
 }
 
@@ -328,6 +331,8 @@ pub fn command(app: &mut PdfCraftApp, reset: bool, params: &Value) -> Result<Val
 
 struct Content<'a> {
     app: &'a mut PdfCraftApp,
+    /// The width the All tools list needs, while the Tools pane shows it (`all_tools_list_width`).
+    list_width: Option<f32>,
 }
 
 impl PaneContent<Pane> for Content<'_> {
@@ -350,11 +355,14 @@ impl PaneContent<Pane> for Content<'_> {
     }
 
     fn default_state(&self, pane: &Pane) -> PaneState {
-        state_of(&self.app.side_panels, *pane)
+        state_of(&self.app.side_panels, *pane, self.list_width)
     }
 
     fn size_range(&self, pane: &Pane) -> RangeInclusive<f32> {
-        pane.range()
+        match (pane, self.list_width) {
+            (Pane::Tools, Some(fit)) => fit..=*TOOLS_RANGE.end(),
+            _ => pane.range(),
+        }
     }
 
     fn movable(&self, _pane: &Pane) -> bool {
@@ -368,12 +376,17 @@ impl PaneContent<Pane> for Content<'_> {
 }
 
 /// Return the docked [`PaneState`] (edge and width) for `pane`.
-fn state_of(panels: &SidePanels, pane: Pane) -> PaneState {
+fn state_of(panels: &SidePanels, pane: Pane, list_width: Option<f32>) -> PaneState {
     let edge = match pane {
         Pane::Tools => panels.tools_edge(),
         Pane::Side => panels.rail_edge(),
     };
-    PaneState::docked(edge, panels.width(pane))
+    // The All tools list fits its names; the saved width stays for the panels that need it.
+    let width = match (pane, list_width) {
+        (Pane::Tools, Some(fit)) => panels.list_drag.map_or(fit, |dragged| dragged.clamp(fit, *TOOLS_RANGE.end())),
+        _ => panels.width(pane),
+    };
+    PaneState::docked(edge, width)
 }
 
 /// The panes that show this frame, outermost first on a shared edge.
@@ -502,6 +515,7 @@ pub fn show(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
     let t = crate::theme::Tokens::get(ui.ctx());
     let labels = PaneLabels { resize: crate::i18n::t("Resize panels").to_owned(), ..PaneLabels::default() };
     let panels = app.side_panels;
+    let list_width = crate::panels::tools_list_width(app, ui);
     // Columns: both panes may share the right edge, Tools outermost, as `open` lists them.
     let host = egui::Id::unique("pdfcraft-side-panels");
     let output = PaneHost::new(host)
@@ -510,11 +524,18 @@ pub fn show(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
         .labels(labels)
         .frame(egui::Frame::NONE.fill(t.panel))
         .body_margin(egui::Margin::ZERO)
-        .show(ui, &open, |pane| Some(state_of(&panels, *pane)), &mut Content { app });
+        .show(ui, &open, |pane| Some(state_of(&panels, *pane, list_width)), &mut Content { app, list_width });
 
     keep_resize_edges_off_scrollbars(ui, host, &open);
     for request in output.requests {
         match request {
+            // The list fits its names; a drag there widens only the list, for this session, and
+            // leaves the saved width the other Tools panels use alone.
+            PaneRequest::Resize(Pane::Tools, width) if list_width.is_some() => {
+                if width.is_finite() {
+                    app.side_panels.list_drag = Some(width);
+                }
+            }
             PaneRequest::Resize(pane, width) => app.side_panels.set_width(pane, width),
             PaneRequest::Close(Pane::Tools) => app.left_open = false,
             PaneRequest::Close(Pane::Side) => app.choose_right_panel(None),
@@ -551,7 +572,10 @@ mod tests {
     #[test]
     fn docked_default_keeps_widths() {
         let restored = restore(&docked(300.0, 400.0));
-        assert_eq!(restored.panels, SidePanels { tools_side: ToolsSide::Left, rail_side: ToolsSide::Right, tools_width: 300.0, side_width: 400.0 });
+        assert_eq!(
+            restored.panels,
+            SidePanels { tools_side: ToolsSide::Left, rail_side: ToolsSide::Right, tools_width: 300.0, side_width: 400.0, list_drag: None }
+        );
         assert_eq!((restored.tools_open, restored.side_closed), (Some(true), false));
     }
 
@@ -581,7 +605,7 @@ mod tests {
         let restored = restore(&old);
         assert_eq!(
             restored.panels,
-            SidePanels { tools_side: ToolsSide::Left, rail_side: ToolsSide::Right, tools_width: TOOLS_WIDTH, side_width: 360.0 }
+            SidePanels { tools_side: ToolsSide::Left, rail_side: ToolsSide::Right, tools_width: TOOLS_WIDTH, side_width: 360.0, list_drag: None }
         );
         assert_eq!((restored.tools_open, restored.side_closed), (Some(true), false));
     }
@@ -607,7 +631,10 @@ mod tests {
             ]),
         );
         let restored = restore(&old);
-        assert_eq!(restored.panels, SidePanels { tools_side: ToolsSide::Right, rail_side: ToolsSide::Right, tools_width: 300.0, side_width: 380.0 });
+        assert_eq!(
+            restored.panels,
+            SidePanels { tools_side: ToolsSide::Right, rail_side: ToolsSide::Right, tools_width: 300.0, side_width: 380.0, list_drag: None }
+        );
         assert_eq!((restored.tools_open, restored.side_closed), (Some(false), true));
     }
 
@@ -628,7 +655,7 @@ mod tests {
         let restored = restore(&json!({"side_panels": {"version": 1, "tools_side": "up", "tools_width": 9000.0, "side_width": "x"}}));
         assert_eq!(
             restored.panels,
-            SidePanels { tools_side: ToolsSide::Left, rail_side: ToolsSide::Right, tools_width: 520.0, side_width: SIDE_WIDTH }
+            SidePanels { tools_side: ToolsSide::Left, rail_side: ToolsSide::Right, tools_width: 520.0, side_width: SIDE_WIDTH, list_drag: None }
         );
         // Deep trees are cut off rather than walked.
         let mut deep = tabs(&["tools"]);
@@ -640,7 +667,7 @@ mod tests {
 
     #[test]
     fn saved_value_round_trips() {
-        let panels = SidePanels { tools_side: ToolsSide::Right, rail_side: ToolsSide::Left, tools_width: 300.0, side_width: 410.0 };
+        let panels = SidePanels { tools_side: ToolsSide::Right, rail_side: ToolsSide::Left, tools_width: 300.0, side_width: 410.0, list_drag: None };
         let restored = restore(&json!({ "side_panels": panels.to_json(false) }));
         assert_eq!(restored, Restored { panels, tools_open: Some(false), side_closed: false });
     }

@@ -44,6 +44,12 @@ fn tools(h: &Harness<'static, PdfCraftApp>) -> egui::Rect {
     h.get_by_label("Expand all tools").rect()
 }
 
+/// Where the Tools pane's resize edge is. Docked on the left it is the pane's width; docked on the
+/// right the width is the negative of it (only the differences matter to the tests that use it).
+fn edge_x(h: &Harness<'static, PdfCraftApp>) -> f32 {
+    h.get_all_by_label("Resize panels").next().expect("the Tools pane has a resize edge").rect().center().x
+}
+
 #[test]
 fn rail_is_outermost_then_tools_then_the_side_panel_then_the_page() {
     // Tools on the left: the page between Tools and the side panel, the rail at the right edge.
@@ -170,7 +176,7 @@ fn scrollbar_and_panel_resize_handle_do_not_collide_on_either_dock_side() {
     assert_eq!(h.output().platform_output.cursor_icon, egui::CursorIcon::ResizeHorizontal);
 
     // Dragging the scrollbar down scrolls the content up without resizing the panel.
-    let initial_width = h.state().side_panels.tools_width;
+    let initial_width = edge_x(&h);
     let first_row_before = h.get_by_label("Edit a PDF").rect().top();
     h.hover_at(sb_rect.center());
     h.run_steps(1);
@@ -182,7 +188,7 @@ fn scrollbar_and_panel_resize_handle_do_not_collide_on_either_dock_side() {
     h.run_steps(2);
     let first_row_after = h.get_by_label("Edit a PDF").rect().top();
     assert!(first_row_after < first_row_before, "Content should scroll up when dragging scrollbar down");
-    assert_eq!(h.state().side_panels.tools_width, initial_width, "Dragging scrollbar must not resize the panel");
+    assert_eq!(edge_x(&h), initial_width, "Dragging scrollbar must not resize the panel");
 
     // Dragging the splitter smoothly resizes the panel.
     h.hover_at(splitter_rect.center());
@@ -193,7 +199,7 @@ fn scrollbar_and_panel_resize_handle_do_not_collide_on_either_dock_side() {
     h.run_steps(1);
     h.drop_at(splitter_rect.center() + egui::vec2(40.0, 0.0));
     h.run_steps(2);
-    let after_width = h.state().side_panels.tools_width;
+    let after_width = edge_x(&h);
     assert!(after_width > initial_width);
     assert!((after_width - (initial_width + 40.0)).abs() <= 5.0);
 
@@ -221,7 +227,7 @@ fn scrollbar_and_panel_resize_handle_do_not_collide_on_either_dock_side() {
         "the page's scrollbar is beside the edge: {page_bar:?} {right_splitter_rect:?}"
     );
     let tools_bar = bars.iter().copied().find(|r| r.min.x > right_splitter_rect.center().x).expect("Tools panel scrollbar should exist");
-    let initial_right_width = h_right.state().side_panels.tools_width;
+    let initial_right_width = -edge_x(&h_right);
 
     // All of either scrollbar is the scrollbar, not the resize edge.
     for bar in [page_bar, tools_bar] {
@@ -248,11 +254,11 @@ fn scrollbar_and_panel_resize_handle_do_not_collide_on_either_dock_side() {
     let before = page_top(&h_right);
     drag(&mut h_right, egui::pos2(page_bar.max.x - 1.0, page_bar.center().y));
     assert!(page_top(&h_right) < before, "dragging the page's scrollbar scrolls the page");
-    assert_eq!(h_right.state().side_panels.tools_width, initial_right_width, "Dragging scrollbar must not resize the panel");
+    assert_eq!(-edge_x(&h_right), initial_right_width, "Dragging scrollbar must not resize the panel");
     let before = h_right.get_by_label("Edit a PDF").rect().top();
     drag(&mut h_right, egui::pos2(tools_bar.max.x - 1.0, tools_bar.center().y));
     assert!(h_right.get_by_label("Edit a PDF").rect().top() < before, "Content should scroll up when dragging scrollbar down");
-    assert_eq!(h_right.state().side_panels.tools_width, initial_right_width, "Dragging scrollbar must not resize the panel");
+    assert_eq!(-edge_x(&h_right), initial_right_width, "Dragging scrollbar must not resize the panel");
 
     // Splitter is at the left boundary of the right-docked pane.
     h_right.hover_at(right_splitter_rect.center());
@@ -269,7 +275,7 @@ fn scrollbar_and_panel_resize_handle_do_not_collide_on_either_dock_side() {
     h_right.run_steps(1);
     h_right.drop_at(right_splitter_rect.center() - egui::vec2(30.0, 0.0));
     h_right.run_steps(2);
-    let after_right_width = h_right.state().side_panels.tools_width;
+    let after_right_width = -edge_x(&h_right);
     assert!(after_right_width > initial_right_width);
     assert!((after_right_width - (initial_right_width + 30.0)).abs() <= 5.0);
 
@@ -277,4 +283,36 @@ fn scrollbar_and_panel_resize_handle_do_not_collide_on_either_dock_side() {
     h_right.hover_at(right_splitter_rect.center() + egui::vec2(15.0, 0.0));
     h_right.run_steps(1);
     assert_ne!(h_right.output().platform_output.cursor_icon, egui::CursorIcon::ResizeHorizontal);
+}
+
+#[test]
+fn the_all_tools_list_fits_its_names_and_a_tools_own_panel_keeps_the_saved_width() {
+    use pdfcraft_ui_egui::LeftPanel;
+    let mut h = harness(|_| {});
+    // The list: narrower than the saved width the other panels need, but wide enough for the names.
+    let list = edge_x(&h);
+    assert!(list < 262.0, "the list is narrower than the saved {}: {list}", pdfcraft_ui_egui::side_panels::TOOLS_WIDTH);
+    assert!((200.0..=225.0).contains(&(list - 3.0)), "the list is about 200 pt wide: {list}");
+    assert!(h.query_by_label("Use a certificate").is_some(), "the list still shows its longest name");
+    // A tool's own panel keeps the saved width, which Format text's rows need.
+    h.state_mut().left = LeftPanel::Tool("protect");
+    h.run_steps(3);
+    // (The resize edge sits a few points past the pane's own width.)
+    let tool_edge = edge_x(&h);
+    assert!((tool_edge - pdfcraft_ui_egui::side_panels::TOOLS_WIDTH).abs() <= 6.0, "a tool's panel uses the saved width: {tool_edge}");
+    // Dragging in the list widens it for the session without changing the saved width.
+    h.state_mut().left = LeftPanel::AllTools;
+    h.run_steps(3);
+    let before = edge_x(&h);
+    let edge = h.get_all_by_label("Resize panels").next().unwrap().rect().center();
+    h.hover_at(edge);
+    h.run_steps(1);
+    h.drag_at(edge);
+    h.run_steps(1);
+    h.hover_at(edge + egui::vec2(50.0, 0.0));
+    h.run_steps(1);
+    h.drop_at(edge + egui::vec2(50.0, 0.0));
+    h.run_steps(2);
+    assert!((edge_x(&h) - (before + 50.0)).abs() <= 5.0, "the list follows the drag: {before} -> {}", edge_x(&h));
+    assert_eq!(h.state().side_panels.tools_width, pdfcraft_ui_egui::side_panels::TOOLS_WIDTH, "the saved width is untouched");
 }

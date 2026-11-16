@@ -48,7 +48,7 @@ cargo build --release -p pdfcraft               # the exe is target/release/pdfc
 
 On Windows you can double-click `build.bat`: it builds the app and copies `pdfcraft.exe` to `dist\`. The first build takes 10 to 20 minutes.
 
-The GitHub workflow in `.github/workflows/build-and-release.yml` builds the Windows zip and the macOS disk image and publishes them as a release. Start it from the **Actions** tab (Run workflow) with a tag such as `v0.21.1`, or by pushing a version tag.
+The GitHub workflow in `.github/workflows/build-and-release.yml` builds the Windows zip and the macOS disk image and publishes them as a release. Start it from the **Actions** tab (Run workflow) with a tag such as `v0.21.2`, or by pushing a version tag.
 
 Developer notes (logs, environment variables, the crate layout) are in [docs/development.md](docs/development.md).
 
