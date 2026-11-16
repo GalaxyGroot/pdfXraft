@@ -9,7 +9,7 @@
 ## What it does
 
 - **Read** any PDF: world scripts, vertical Japanese, colour emoji, gradients and transparency, with fast scrolling, two-page view, full screen and dark reading colours.
-- **Find** text with the find bar (Ctrl+F). With the *Extra keyboard shortcuts* option on, `/` and `?` open a search bar along the bottom that searches forward or backward, with optional regular expressions.
+- **Find** text with the find bar (Ctrl+F). With the *Extra keyboard shortcuts* option on (it is on by default), `/` and `?` open a search bar along the bottom that searches forward or backward, with optional regular expressions.
 - **Organize** pages like cards: reorder, rotate, delete and extract them, and combine and split files.
 - **Protect** with passwords and permissions, open protected files, redact, and check signatures.
 - **Comments, forms, layers, attachments and signatures.**
@@ -34,7 +34,7 @@ The OCR models are separate files under their own licence (CC-BY-SA-4.0); their 
 
 ## Keyboard
 
-Press **F1** in the app for the full list of shortcuts. Beyond the usual ones, **Preferences** has an *Extra keyboard shortcuts* option for single-key navigation (`h j k l` to scroll, `g` and `G` for first and last page, `n` and `N` for the next match, `F` to fit the page, and more). **Customize keys…** next to it lets you choose the key for each of those actions.
+Press **F1** in the app for the full list of shortcuts. Beyond the usual ones, **Preferences** has an *Extra keyboard shortcuts* option, on by default, for single-key navigation (`h j k l` to scroll, `g` and `G` for first and last page, `n` and `N` for the next match, `F` to fit the page, and more). **Customize keys…** next to it lets you choose the key for each of those actions.
 
 ## Build from source
 

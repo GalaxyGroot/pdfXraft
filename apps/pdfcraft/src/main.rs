@@ -460,6 +460,9 @@ fn app_creator<'a>(
         // The side panels hide when a PDF opens until the user pins them (View ▸ Pin side panels); a
         // saved choice replaces this. The library default stays pinned.
         app.pin_side_panels = false;
+        // The extra keyboard shortcuts (Preferences) are on until the user turns them off; a saved
+        // choice replaces this. The library default stays off.
+        app.extra_keys = true;
         if let Some(json) = cc.storage.and_then(|s| s.get_string("pdfcraft").or_else(|| s.get_string(LEGACY_STORAGE_KEY))) {
             app.restore(&json);
         }

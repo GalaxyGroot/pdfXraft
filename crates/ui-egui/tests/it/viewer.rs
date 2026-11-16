@@ -2404,6 +2404,21 @@ fn p_picks_the_hand_with_or_without_the_extra_keys_and_h_does_not() {
     }
 }
 
+#[test]
+fn an_old_extra_keys_value_is_not_read_so_the_new_default_applies() {
+    let mut app = PdfCraftApp::new();
+    // The desktop app starts with the extra shortcuts on.
+    app.extra_keys = true;
+    app.restore(&serde_json::json!({ "extra_keys": false }).to_string());
+    assert!(app.extra_keys, "a value saved under the old name was never a choice, and is not read");
+    app.restore(&serde_json::json!({ "extra_keys_on": false }).to_string());
+    assert!(!app.extra_keys, "a choice saved under the new name is");
+    let mut again = PdfCraftApp::new();
+    again.extra_keys = true;
+    again.restore(&app.persist());
+    assert!(!again.extra_keys, "and it round-trips");
+}
+
 /// A 40 × 30 picture (one red corner) and a harness showing a PDF of it.
 fn picture_harness() -> (image::RgbaImage, Harness<'static, PdfCraftApp>) {
     picture_harness_sized(egui::vec2(1400.0, 900.0))

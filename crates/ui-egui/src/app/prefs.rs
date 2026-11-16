@@ -114,7 +114,9 @@ impl PdfCraftApp {
             "pinned_folders_collapsed": self.pinned.collapsed,
             "theme": self.theme_preference,
             "scroll_speed": self.scroll_speed,
-            "extra_keys": self.extra_keys,
+            // Not `extra_keys`: a value saved under that name was a test's, not a choice, and the
+            // desktop app now starts with the shortcuts on.
+            "extra_keys_on": self.extra_keys,
             // Not `pin_side_panels`: that was saved as true before pinning was a choice.
             "side_panels_pinned": self.pin_side_panels,
             "rail_open": self.rail_open,
@@ -326,7 +328,7 @@ impl PdfCraftApp {
         if let Some(pinned) = v["side_panels_pinned"].as_bool() {
             self.pin_side_panels = pinned;
         }
-        if let Some(extra) = v["extra_keys"].as_bool() {
+        if let Some(extra) = v["extra_keys_on"].as_bool() {
             self.extra_keys = extra;
         }
         if let Some(invert) = v["invert_middle_drag"].as_bool() {
