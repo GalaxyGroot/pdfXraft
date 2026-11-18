@@ -205,6 +205,7 @@ impl PdfCraftApp {
         v["comment_tool_pinned"] = serde_json::Value::Bool(self.comment_prefs.pinned);
         v["show_secured_notice"] = serde_json::Value::Bool(self.show_secured_notice);
         v["text_links"] = serde_json::Value::Bool(self.text_links);
+        v["title_on_tabs"] = serde_json::Value::Bool(self.title_on_tabs);
         v["organize_zoom"] = serde_json::json!(self.organize_zoom);
         // Canonical names survive changes to the order of PAPERS and do not depend on UI language;
         // a custom paper is stored by the name it was given.
@@ -291,6 +292,9 @@ impl PdfCraftApp {
         }
         if let Some(on) = v["text_links"].as_bool() {
             self.text_links = on;
+        }
+        if let Some(on) = v["title_on_tabs"].as_bool() {
+            self.title_on_tabs = on;
         }
         self.pinned.restore(&v["pinned_folders"]);
         self.pinned.restore_collapsed(&v["pinned_folders_collapsed"]);

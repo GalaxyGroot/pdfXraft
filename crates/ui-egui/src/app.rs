@@ -162,6 +162,7 @@ impl PdfCraftApp {
             update_check_at_start: true,
             show_secured_notice: true,
             text_links: true,
+            title_on_tabs: false,
             always_default_view: false,
             #[cfg(not(target_arch = "wasm32"))]
             watch: Default::default(),

@@ -828,6 +828,10 @@ fn card_documents_and_view(ui: &mut egui::Ui, app: &mut PdfCraftApp, t: &Tokens,
     ctx.label_secondary(ui, tl!("Only web (http, https) and email addresses open, and PdfCraft asks first, as for other links."), t);
     ui.add_space(6.0);
 
+    ctx.checkbox(ui, &mut app.title_on_tabs, tl!("Show a document's title on its tab when the PDF asks for it"), t);
+    ctx.label_secondary(ui, tl!("Off: tabs and the window show the file name."), t);
+    ui.add_space(6.0);
+
     ui.horizontal(|ui| {
         ctx.label_primary(ui, tl!("Units"), t);
         ctx.pill_choice(

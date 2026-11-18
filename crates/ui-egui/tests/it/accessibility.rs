@@ -91,6 +91,9 @@ fn checking_fixing_skipping_and_reporting() {
     assert_eq!(status(&h, Rule::Title), Status::Passed);
     assert_eq!(h.state().a11y.previous.as_ref().unwrap().1.result(Rule::Title).unwrap().status, Status::Failed);
     assert!(matches!(h.state().dialog, Some(Dialog::Properties(_))));
+    // The title shows on the tab and window only when Preferences ask for it.
+    h.state_mut().title_on_tabs = true;
+    h.run_steps(2);
     assert_eq!(h.state().window_title, "notes • — PdfCraft");
     h.state_mut().dialog = None;
     h.run_steps(2);

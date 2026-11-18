@@ -9339,7 +9339,7 @@ status = "shipped"
 commands = ["file.properties"]
 tools = ["doc_initial_view"]
 evidence = ["crates/automation/tests/it/automation.rs::initial_view_through_tools", "crates/ui-egui/tests/it/viewer.rs::tab_and_window_show_the_document_title_when_asked"]
-notes = "Initial View ▸ Show: Document Title (/DisplayDocTitle); the tab and window then show the title"
+notes = "Initial View ▸ Show: Document Title (/DisplayDocTitle); with Preferences ▸ Show a document's title on its tab on, the tab and window then show the title, else the file name"
 
 [[feature]]
 id = "a11y.make-accessible-action"

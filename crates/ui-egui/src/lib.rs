@@ -509,6 +509,9 @@ pub struct PdfCraftApp {
     /// Preferences: web and email addresses written as plain page text open on a click, like
     /// links (#4207).
     pub text_links: bool,
+    /// Preferences: when a PDF asks to be shown by its title (Initial View ▸ Show: Document Title),
+    /// the tab and window show that title. Off (the default), they show the file name.
+    pub title_on_tabs: bool,
     /// Preferences: open every document at Default zoom and Default page display, whatever
     /// layout or zoom it asks for (#1618).
     pub always_default_view: bool,

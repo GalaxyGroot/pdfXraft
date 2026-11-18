@@ -398,6 +398,13 @@ impl PdfCraftApp {
                     _ => return Err("text-links must be true or false".into()),
                 };
             }
+            ("title-on-tabs", _) => {
+                self.title_on_tabs = match value {
+                    "true" => true,
+                    "false" => false,
+                    _ => return Err("title-on-tabs must be true or false".into()),
+                };
+            }
             ("ui-scale", _) => self.ui_scale = ui_scale::parse(value)?,
             // `--secured-notice false`: no notice above the pages that a document is secured.
             ("secured-notice", _) => {

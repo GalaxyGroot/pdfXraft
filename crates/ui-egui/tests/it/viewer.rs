@@ -1218,6 +1218,7 @@ fn tab_and_window_show_the_document_title_when_asked() {
     assert_eq!(h.state().window_title, "b.pdf — PdfCraft");
     {
         let s = h.state_mut();
+        s.title_on_tabs = true;
         let id = s.views[s.active.unwrap()].id;
         s.session.apply(id, Edit::SetInfo { key: "Title".into(), value: "Quarterly report".into() }).unwrap();
         let mut v = s.session.get(id).unwrap().initial_view();
@@ -1228,6 +1229,29 @@ fn tab_and_window_show_the_document_title_when_asked() {
     // The edits are unsaved, so the title says so (#3640).
     assert_eq!(h.state().window_title, "Quarterly report • — PdfCraft");
     h.get_by_label_contains("Quarterly report");
+}
+
+#[test]
+fn tabs_show_the_file_name_even_when_the_pdf_asks_for_its_title_unless_preferences_say_otherwise() {
+    use pdfcraft_engine::Edit;
+    let mut h = harness();
+    {
+        let s = h.state_mut();
+        let id = s.views[s.active.unwrap()].id;
+        s.session.apply(id, Edit::SetInfo { key: "Title".into(), value: "Quarterly report".into() }).unwrap();
+        let mut v = s.session.get(id).unwrap().initial_view();
+        v.display_title = true;
+        s.session.apply(id, Edit::SetInitialView(Box::new(v))).unwrap();
+    }
+    h.run_steps(2);
+    // The default: the file name on the tab and the window, and no title anywhere (so the tab's
+    // tooltip has the file name only).
+    assert_eq!(h.state().window_title, "b.pdf • — PdfCraft");
+    assert!(h.query_by_label_contains("Quarterly report").is_none());
+    h.state_mut().set_option("title-on-tabs", "true").unwrap();
+    h.run_steps(2);
+    assert_eq!(h.state().window_title, "Quarterly report • — PdfCraft");
+    assert!(h.state_mut().set_option("title-on-tabs", "maybe").is_err());
 }
 
 #[test]
@@ -1319,6 +1343,7 @@ fn the_web_page_title_names_the_file_when_the_document_shows_its_title() {
     let mut h = harness();
     {
         let s = h.state_mut();
+        s.title_on_tabs = true;
         let id = s.views[s.active.unwrap()].id;
         s.session.apply(id, Edit::SetInfo { key: "Title".into(), value: "Budget 2026".into() }).unwrap();
         let mut v = s.session.get(id).unwrap().initial_view();
@@ -1338,6 +1363,7 @@ fn a_placeholder_title_leaves_the_file_name_on_the_tab_and_window() {
     let mut h = harness();
     {
         let s = h.state_mut();
+        s.title_on_tabs = true;
         let id = s.views[s.active.unwrap()].id;
         s.session.apply(id, Edit::SetInfo { key: "Title".into(), value: "about:blank".into() }).unwrap();
         let mut v = s.session.get(id).unwrap().initial_view();
@@ -2959,6 +2985,7 @@ fn the_accessible_window_has_the_window_title_as_its_name() {
     {
         use pdfcraft_engine::Edit;
         let s = h.state_mut();
+        s.title_on_tabs = true;
         let id = s.views[s.active.unwrap()].id;
         s.session.apply(id, Edit::SetInfo { key: "Title".into(), value: "Quarterly report".into() }).unwrap();
         let mut v = s.session.get(id).unwrap().initial_view();

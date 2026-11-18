@@ -463,8 +463,10 @@ fn verdict_mark_rect(widget: Rect, page: Rect, anchor: Pos2) -> Option<Rect> {
 pub(crate) fn tab_label(app: &PdfCraftApp, index: usize) -> Option<String> {
     let view = app.views.get(index)?;
     let doc = app.session.get(view.id)?;
-    let Some(snap) = view.snapshot.as_ref() else { return Some(doc.display_name()) };
-    Some(snapshot_tab_name(&doc.display_name(), &doc.name, snap))
+    // The file name, unless Preferences asks for the title a PDF wants shown.
+    let shown = if app.title_on_tabs { doc.display_name() } else { doc.name.clone() };
+    let Some(snap) = view.snapshot.as_ref() else { return Some(shown) };
+    Some(snapshot_tab_name(&shown, &doc.name, snap))
 }
 
 /// A snapshot's tab name from its source title, file name and marker. Pure so the
