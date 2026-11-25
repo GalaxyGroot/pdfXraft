@@ -15,6 +15,8 @@
 pub const UPDATE_APP: craft_update::app::App = craft_update::app::App {
     icon_png: Some(include_bytes!("../../../assets/app-icon/hicolor/128x128/apps/ai.storyteller.pdfcraft.png")),
     accent: Some([0xb7, 0x02, 0x28]),
+    // This fork's own releases (see .github/workflows/build-and-release.yml), not upstream's.
+    repo: "GalaxyGroot/pdfXraft",
     ..craft_update::suite::PDFCRAFT
 };
 
@@ -122,6 +124,7 @@ use dialogs::appearance;
 pub use dialogs::bookmark_styles_ui;
 use dialogs::comment_props;
 use dialogs::convert_colours_ui;
+#[cfg(test)]
 use dialogs::credits;
 use dialogs::hairlines_ui;
 use dialogs::marks_ui;

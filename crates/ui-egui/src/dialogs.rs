@@ -11,6 +11,8 @@ pub(super) mod appearance;
 pub mod bookmark_styles_ui;
 pub(super) mod comment_props;
 pub(super) mod convert_colours_ui;
+// The About window no longer shows contributors or models; the module stays for now.
+#[allow(dead_code)]
 pub(super) mod credits;
 pub(super) mod hairlines_ui;
 pub(super) mod marks_ui;
@@ -1581,7 +1583,7 @@ fn dialog_recovery(ui: &mut egui::Ui, app: &mut PdfCraftApp) -> bool {
         ui.label(egui::RichText::new(tl!("Recover unsaved documents?")).font(theme::semibold(18.0)));
     });
     ui.add_space(6.0);
-    ui.label(tl!("PdfCraft didn't shut down normally. These documents had changes that were autosaved:"));
+    ui.label(tl!("PdfXraft didn't shut down normally. These documents had changes that were autosaved:"));
     ui.add_space(8.0);
     let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
     egui::Grid::new("recoverable").num_columns(2).spacing([18.0, 6.0]).show(ui, |ui| {
@@ -1868,31 +1870,10 @@ fn dialog_keybindings(ui: &mut egui::Ui, app: &mut PdfCraftApp) -> bool {
 
 /// `Dialog::About` content. Returns `false` when it has its own buttons and no footer is wanted.
 fn dialog_about(ui: &mut egui::Ui, _req: &mut Pending) -> bool {
-    let t = Tokens::get(ui.ctx());
-    ui.horizontal(|ui| {
-        widgets::artcraft_mark(ui, 40.0);
-        ui.vertical(|ui| {
-            ui.label(egui::RichText::new("PdfCraft").font(theme::semibold(20.0)));
-            ui.label(crate::i18n::fmt(tl!("Version {v}"), &[("v", &pdfcraft_engine::build_info::version())]));
-        });
-    });
+    ui.label(egui::RichText::new("PdfXraft").font(theme::semibold(20.0)));
+    ui.label(crate::i18n::fmt(tl!("Version {v}"), &[("v", &pdfcraft_engine::build_info::version())]));
     ui.add_space(8.0);
-    ui.label(tl!("A clean-room, open-source PDF application written in Rust. MIT OR Apache-2.0."));
-    ui.add_space(8.0);
-    // Who built it and what it is made of: one click away, not a page of its own.
-    egui::CollapsingHeader::new(egui::RichText::new(tl!("Credits")).color(t.text_muted)).default_open(false).show(ui, |ui| {
-        ui.label(
-            egui::RichText::new("Rendering: hayro (bootstrap) · UI: egui · Icons: Lucide (ISC) · Fonts: Inter, JetBrains Mono, Dancing Script (OFL)")
-                .color(t.text_muted)
-                .small(),
-        );
-        ui.add_space(6.0);
-        egui::ScrollArea::vertical().max_height(240.0).auto_shrink([false, true]).show(ui, |ui| {
-            crate::credits::contributors_ui(ui);
-            ui.add_space(8.0);
-            crate::credits::models_ui(ui);
-        });
-    });
+    ui.label(tl!("An open-source PDF application. MIT license."));
     true
 }
 

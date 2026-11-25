@@ -3451,7 +3451,7 @@ fn source_font_fixture_with_text(body: &str) -> Vec<u8> {
         "<< /Type /Font /Subtype /Type1 /BaseFont /Times-BoldItalic >>".into(),
         "<< /Type /Page /Parent 2 0 R /Contents 7 0 R /Resources << /Font << /F1 3 0 R /F2 5 0 R >> >> >>".into(),
         "<< /Type /Font /Subtype /Type1 /BaseFont /Courier-Oblique >>".into(),
-        "<< /Producer (PdfCraft) >>".into(),
+        "<< /Producer (PdfXraft) >>".into(),
         format!("<< /Length {} >>\nstream\n{body}\nendstream", body.len()),
     ];
     let mut out = b"%PDF-1.7\n".to_vec();
@@ -4037,6 +4037,8 @@ fn save_live_shot(h: &mut Harness<'static, PdfCraftApp>, name: &str) {
 /// beside a kept first row leaves the neighbour as its own paragraph on screen.
 #[test]
 fn the_live_editor_groups_a_repeated_step_and_keeps_the_neighbour() {
+    // `save_live_shot` renders on the GPU: one device at a time (see `gpu`).
+    let _gpu = gpu();
     let step = 27.6_f32;
     let repeated = format!(
         "BT /F1 12 Tf 72 700 Td (One) Tj ET BT /F1 12 Tf 72 {} Td (Two) Tj ET BT /F1 12 Tf 72 {} Td (Three) Tj ET",
@@ -4080,6 +4082,8 @@ fn the_live_editor_groups_a_repeated_step_and_keeps_the_neighbour() {
 /// Widening example 1 must not pull the heading into that box or split the paragraph under example 2.
 #[test]
 fn widening_example_one_keeps_the_heading_and_the_next_paragraph() {
+    // `save_live_shot` renders on the GPU: one device at a time (see `gpu`).
+    let _gpu = gpu();
     let body = "BT /F1 14 Tf 72 740 Td (1. Repeated step, no TL. Click Two.) Tj ET \
                 BT /F1 12 Tf 72 700 Td (One) Tj ET \
                 BT /F1 12 Tf 72 672.4 Td (Two) Tj ET \
@@ -4155,6 +4159,8 @@ fn widening_example_one_keeps_the_heading_and_the_next_paragraph() {
 /// The live width handle, after a row was added on top of the neighbour.
 #[test]
 fn resizing_the_live_box_keeps_the_neighbour() {
+    // `save_live_shot` renders on the GPU: one device at a time (see `gpu`).
+    let _gpu = gpu();
     let partial = "BT /F1 12 Tf 14.4 TL 1 0 0 1 72 410 Tm (Alpha first row.) Tj T* (Alpha next row.) Tj ET \
                    BT /F1 12 Tf 14.4 TL 1 0 0 1 72 366.8 Tm (Neighbor stays.) Tj ET";
     let mut h = open_letter("partial.pdf", letter_text(partial));

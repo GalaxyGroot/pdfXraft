@@ -132,11 +132,11 @@ fn run_until_asked(h: &mut Harness<'static, PdfCraftApp>, calls: &std::sync::ato
 #[test]
 fn the_preference_keeps_the_check_at_start_from_reaching_the_network() {
     use std::sync::atomic::Ordering::SeqCst;
-    assert!(PdfCraftApp::new().update_check_at_start, "on by default");
+    assert!(!PdfCraftApp::new().update_check_at_start, "off by default: users check by hand");
 
     // The same start with the preference left on does ask, so a count of none below means
     // the preference held the check back and not that it hadn't run yet.
-    let (mut h, calls) = started_with("{}");
+    let (mut h, calls) = started_with(r#"{"update_check_at_start": true}"#);
     run_until_asked(&mut h, &calls, std::time::Duration::from_secs(30));
     assert_eq!(calls.load(SeqCst), 1, "on, the app asks at start");
 
@@ -173,7 +173,7 @@ fn preferences_turn_the_check_at_start_off() {
     later_on_the_startup_prompt(&mut h);
     h.state_mut().execute("app.preferences");
     h.run_steps(3);
-    h.get_by_label("Check for updates when PdfCraft starts").click();
+    h.get_by_label("Check for updates when PdfXraft starts").click();
     h.run_steps(3);
     assert!(!h.state().update_check_at_start);
     // The control channel's option, as an agent sets it.
@@ -183,10 +183,10 @@ fn preferences_turn_the_check_at_start_off() {
 }
 
 #[test]
-fn settings_from_the_old_opt_in_leave_the_check_at_start_on() {
+fn settings_from_the_old_opt_in_leave_the_check_at_start_off() {
     let mut app = PdfCraftApp::new();
     app.restore(r#"{"check_updates_at_start": false}"#);
-    assert!(app.update_check_at_start, "a key of the removed option decides nothing");
+    assert!(!app.update_check_at_start, "a key of the removed option decides nothing");
 }
 
 #[test]
@@ -196,6 +196,7 @@ fn the_check_at_start_offers_the_prompt_and_later_dismisses_it() {
         app.set_option("language", "en").unwrap();
         app.set_update_source(source(Ok(Some("v99.0.0"))));
         app.set_startup_update_check(true);
+        app.set_option("update_check_at_start", "true").unwrap();
         app
     });
     later_on_the_startup_prompt(&mut h);

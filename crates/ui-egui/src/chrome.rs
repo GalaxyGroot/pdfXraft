@@ -77,7 +77,7 @@ pub fn tab_strip(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                 }
                 // Reserve the three icon buttons, Discord and their gaps outside the scrolling tabs.
                 // (Five now: Discord is an icon, and the menu-bar toggle sits beside it.)
-                let controls_width = 5.0 * button + 26.0 + window_controls::width(&controls.right);
+                let controls_width = 4.0 * button + 26.0 + window_controls::width(&controls.right);
                 // Open (just its plus) stays in sight after the tabs, with the gaps around it.
                 let open_width = tab_h + 12.0;
                 let mut tabs_width = (ui.available_width() - controls_width - open_width).max(0.0);
@@ -277,13 +277,7 @@ pub fn tab_strip(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                     if icons::button(ui, "circle-help", button, false, tl!("Keyboard shortcuts")).clicked() {
                         app.dialog = Some(Dialog::Shortcuts);
                     }
-                    // One click to the community, from anywhere in the app. Just the icon: its name is
-                    // still "Discord" for screen readers and tests, and the tooltip says where it goes.
-                    let discord_tip = format!("{} ({})", tl!("Join the ArtCraft Discord"), pdfcraft_engine::links::DISCORD);
-                    if icons::labeled_button(ui, "messages-square", button, false, "Discord", &discord_tip).clicked() {
-                        app.execute("help.discord");
-                    }
-                    // Beside it: hide the whole second row (menus, tool tabs, search, save and print)
+                    // Hide the whole second row (menus, tool tabs, search, save and print)
                     // for more room, and show it again. Its place in the title bar stays, so there is
                     // always a way back; the keyboard shortcuts and Ctrl+K keep working meanwhile.
                     let (icon, tip) =

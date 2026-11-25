@@ -10,7 +10,7 @@ use craft_update::{CheckResultDialog, CheckResultResponse};
 use crate::PdfCraftApp;
 
 /// Where every PdfCraft release is listed.
-pub const RELEASES_PAGE: &str = "https://github.com/storytold/pdfcraft/releases";
+pub const RELEASES_PAGE: &str = "https://github.com/GalaxyGroot/pdfXraft/releases";
 
 /// Stands in for the network in tests.
 #[cfg(not(target_arch = "wasm32"))]
@@ -323,7 +323,7 @@ mod tests {
         app.updates.updater.offer(craft_update::Release {
             tag: "v99.0.0".into(),
             version: craft_update::parse_version("99.0.0"),
-            name: "PdfCraft 99.0.0".into(),
+            name: "PdfXraft 99.0.0".into(),
             html_url: "https://github.com/storytold/pdfcraft/releases/tag/v99.0.0".into(),
             ..Default::default()
         });

@@ -94,7 +94,7 @@ fn checking_fixing_skipping_and_reporting() {
     // The title shows on the tab and window only when Preferences ask for it.
     h.state_mut().title_on_tabs = true;
     h.run_steps(2);
-    assert_eq!(h.state().window_title, "notes • — PdfCraft");
+    assert_eq!(h.state().window_title, "notes • — PdfXraft");
     h.state_mut().dialog = None;
     h.run_steps(2);
     h.get_by_label("Compare");

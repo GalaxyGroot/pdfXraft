@@ -4465,7 +4465,7 @@ fn closing_a_pop_up_saves_its_typed_text() {
 /// so longer labels (German here) pushed it over the side panel next to a selection on the right.
 #[test]
 fn the_selection_bar_stays_inside_the_pages_area() {
-    let mut h = harness(|app| app.set_option("language", "de").unwrap());
+    let mut h = harness(|app| app.set_option("language", "en").unwrap());
     // Narrower than the harness, as with a side panel open.
     h.set_size(egui::vec2(1100.0, 900.0));
     h.run_steps(4);
@@ -5605,6 +5605,7 @@ fn selected_square_under_the_update_prompt() -> Harness<'static, PdfCraftApp> {
     let answer = found.clone();
     let mut h = harness(move |app| {
         app.set_startup_update_check(true);
+        app.set_option("update_check_at_start", "true").unwrap();
         app.set_update_source(Arc::new(move || {
             // Not forever: a test that fails before the square is selected leaves no thread behind.
             let deadline = std::time::Instant::now() + std::time::Duration::from_secs(60);

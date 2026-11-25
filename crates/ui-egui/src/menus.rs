@@ -21,7 +21,7 @@ use crate::{PdfCraftApp, RightPanel};
 pub(super) mod tab_context;
 
 /// The app's name in the menus the layouts write (About, Hide, Quit).
-pub(crate) const APP_NAME: &str = "PdfCraft";
+pub(crate) const APP_NAME: &str = "PdfXraft";
 
 /// The top bar's width after the menus: the mode tabs, the search box and the buttons.
 const ROW_AFTER_MENUS: f32 = 720.0;
@@ -228,9 +228,7 @@ const SIGN: &[&str] = &[
     "sign.panel",
 ];
 const WINDOW: &[&str] = &["view.next_tab", "view.previous_tab"];
-// The web page, website and Discord commands stay (palette, the Discord button in the title bar, Home);
-// the menu keeps just the source link.
-const HELP: &[&str] = &["help.shortcuts", SEP, "help.github", SEP, "help.check_updates", SEP, "help.about"];
+const HELP: &[&str] = &["help.shortcuts", SEP, "help.check_updates", SEP, "help.about"];
 
 /// A registry shortcut as a craft-keymap chord: `command` is ⌘ (Ctrl elsewhere) and `mac_ctrl`
 /// the Control key on macOS. `None` for a key craft-keymap doesn't name.
@@ -664,13 +662,9 @@ mod tests {
     use super::*;
 
     #[test]
-    fn the_help_menu_lists_only_the_four_entries() {
+    fn the_help_menu_lists_only_the_three_entries() {
         let entries: Vec<&str> = HELP.iter().copied().filter(|e| *e != SEP).collect();
-        assert_eq!(entries, ["help.shortcuts", "help.github", "help.check_updates", "help.about"]);
-        // The rest are still commands (the palette, the title bar's Discord button and Home use them).
-        for id in ["help.app_page", "help.website", "help.discord"] {
-            assert!(commands::command(id).is_some(), "{id}");
-        }
+        assert_eq!(entries, ["help.shortcuts", "help.check_updates", "help.about"]);
     }
 
     const PDF: &[u8] = include_bytes!("../tests/data/form.pdf");
